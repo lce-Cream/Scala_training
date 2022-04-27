@@ -17,13 +17,13 @@ lazy val root = (project in file("."))
       libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.12.187" % "provided",
       libraryDependencies += "com.ibm.cos" % "ibm-cos-java-sdk" % "2.8.0" % "provided",
       libraryDependencies += "com.lihaoyi" %% "os-lib" % "0.8.1" % "provided",
+      libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.10.0",
+      libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.27",
+      libraryDependencies += "com.ibm.db2" % "jcc" % "11.5.7.0",
 
-//    libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.12.2",
-//    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
-//    libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.27",
-//    // https://mvnrepository.com/artifact/org.yaml/snakeyaml
+//    https://mvnrepository.com/artifact/org.yaml/snakeyaml
 //    libraryDependencies += "org.yaml" % "snakeyaml" % "1.30",
-//    // https://mvnrepository.com/artifact/com.lihaoyi/os-lib
+//    https://mvnrepository.com/artifact/com.lihaoyi/os-lib
 //    libraryDependencies += "com.lihaoyi" %% "os-lib" % "0.8.1",
 //    libraryDependencies += "com.lihaoyi" %% "upickle" % "0.9.5",
   )
