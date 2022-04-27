@@ -3,14 +3,18 @@ package util
 object DefaultConfig {
     val DB2Credentials = Map(
         "spark.db2.url"      -> "jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true;",
-        "spark.db2.user"     -> "rsg",
-        "spark.db2.password" -> "oOWz4"
+        "spark.db2.user"     -> "qwerty",
+        "spark.db2.password" -> "qwerty",
+        "spark.db2.table"    -> "ARSENI_SALES_TABLE",
+        "spark.db2.driver"   -> "com.ibm.db2.jcc.DB2Driver",
     )
 
     val COSCredentials = Map(
-        "spark.cos.access.key"     -> "5c4f",
-        "spark.cos.secret.key"     -> "af39",
+        "spark.cos.access.key"     -> "qwerty",
+        "spark.cos.secret.key"     -> "qwerty",
         "spark.cos.endpoint"       -> "s3.fra.eu.cloud-object-storage",
+        "spark.cos.bucket"         -> "iba-ats-training-d3bf1ce5",
+        "spark.cos.service"        -> "arseni",
     )
 
     val MySQLCredentials = Map(
@@ -21,6 +25,6 @@ object DefaultConfig {
     )
 
     val LocalCredentials = Map(
-        "spark.local.path" -> "./",
+        "spark.local.path" -> "./data",
     )
 }
