@@ -1,0 +1,238 @@
+Manifest-Version: 1.0
+Main-Class: Main
+Class-Path: aws-java-sdk-shield-1.12.187.jar hadoop-yarn-common-3.2.0.ja
+ r jakarta.xml.bind-api-2.3.2.jar aws-java-sdk-resiliencehub-1.12.187.ja
+ r audience-annotations-0.5.0.jar aws-java-sdk-forecastquery-1.12.187.ja
+ r aws-java-sdk-lambda-1.12.187.jar jersey-hk2-2.30.jar aws-java-sdk-kin
+ esisanalyticsv2-1.12.187.jar aws-java-sdk-transcribe-1.12.187.jar jetty
+ -servlet-9.3.24.v20180605.jar aws-java-sdk-sagemakeredgemanager-1.12.18
+ 7.jar metrics-graphite-4.1.1.jar aws-java-sdk-amplifyuibuilder-1.12.187
+ .jar aws-java-sdk-appregistry-1.12.187.jar minlog-1.3.0.jar aws-java-sd
+ k-cloudwatch-1.12.187.jar aws-java-sdk-serverlessapplicationrepository-
+ 1.12.187.jar kerb-client-1.0.1.jar aws-java-sdk-cloudwatchmetrics-1.12.
+ 187.jar threeten-extra-1.5.0.jar aws-java-sdk-iotsecuretunneling-1.12.1
+ 87.jar aws-java-sdk-kafkaconnect-1.12.187.jar aws-java-sdk-managedgrafa
+ na-1.12.187.jar aws-java-sdk-codestarnotifications-1.12.187.jar metrics
+ -jmx-4.1.1.jar aws-java-sdk-machinelearning-1.12.187.jar aws-java-sdk-n
+ etworkfirewall-1.12.187.jar aws-java-sdk-ioteventsdata-1.12.187.jar aws
+ -java-sdk-mediatailor-1.12.187.jar aws-java-sdk-dax-1.12.187.jar aws-ja
+ va-sdk-networkmanager-1.12.187.jar aws-java-sdk-drs-1.12.187.jar spark-
+ launcher_2.12-3.1.3.jar aws-java-sdk-appflow-1.12.187.jar kerby-util-1.
+ 0.1.jar aws-java-sdk-kendra-1.12.187.jar aws-java-sdk-batch-1.12.187.ja
+ r kerby-xdr-1.0.1.jar aws-java-sdk-glue-1.12.187.jar jersey-server-2.30
+ .jar aws-java-sdk-dynamodb-1.12.187.jar aws-java-sdk-personalizeruntime
+ -1.12.187.jar jakarta.servlet-api-4.0.3.jar aws-java-sdk-importexport-1
+ .12.187.jar hk2-api-2.6.1.jar aws-java-sdk-iot1clickprojects-1.12.187.j
+ ar aws-java-sdk-inspector2-1.12.187.jar httpcore-4.4.13.jar ivy-2.4.0.j
+ ar aws-java-sdk-mwaa-1.12.187.jar httpcore5-5.0.2.jar jcl-over-slf4j-1.
+ 7.30.jar netty-3.10.6.Final.jar aws-java-sdk-opsworkscm-1.12.187.jar aw
+ s-java-sdk-macie2-1.12.187.jar aws-java-sdk-cognitoidp-1.12.187.jar jan
+ ino-3.0.16.jar aws-java-sdk-applicationcostprofiler-1.12.187.jar chill-
+ java-0.9.5.jar javassist-3.25.0-GA.jar pyrolite-4.30.jar aws-java-sdk-s
+ so-1.12.187.jar aws-java-sdk-greengrass-1.12.187.jar aws-java-sdk-coste
+ xplorer-1.12.187.jar kerb-simplekdc-1.0.1.jar spark-network-common_2.12
+ -3.1.3.jar aws-java-sdk-dlm-1.12.187.jar parquet-jackson-1.10.1.jar com
+ mons-text-1.6.jar curator-client-2.13.0.jar aws-java-sdk-inspector-1.12
+ .187.jar aws-java-sdk-iotdeviceadvisor-1.12.187.jar aws-java-sdk-cloudw
+ atchrum-1.12.187.jar aws-java-sdk-chime-1.12.187.jar aws-java-sdk-cloud
+ search-1.12.187.jar aws-java-sdk-lexmodelsv2-1.12.187.jar unused-1.0.0.
+ jar spark-sql_2.12-3.1.3.jar zookeeper-3.4.14.jar chill_2.12-0.9.5.jar 
+ scala-xml_2.12-1.2.0.jar jackson-module-scala_2.12-2.10.0.jar aws-java-
+ sdk-directconnect-1.12.187.jar aws-java-sdk-appconfig-1.12.187.jar aws-
+ java-sdk-athena-1.12.187.jar aws-java-sdk-billingconductor-1.12.187.jar
+  json4s-core_2.12-3.7.0-M5.jar RoaringBitmap-0.9.0.jar aws-java-sdk-mec
+ hanicalturkrequester-1.12.187.jar aws-java-sdk-applicationinsights-1.12
+ .187.jar aws-java-sdk-connectparticipant-1.12.187.jar aws-java-sdk-glue
+ databrew-1.12.187.jar aws-java-sdk-mediapackagevod-1.12.187.jar aws-jav
+ a-sdk-apprunner-1.12.187.jar aws-java-sdk-customerprofiles-1.12.187.jar
+  paranamer-2.8.jar aws-java-sdk-clouddirectory-1.12.187.jar guava-30.0-
+ jre.jar netty-codec-http-4.1.72.Final.jar aws-java-sdk-signer-1.12.187.
+ jar aws-java-sdk-kinesisvideo-1.12.187.jar metrics-core-4.1.1.jar aws-j
+ ava-sdk-elasticsearch-1.12.187.jar aws-java-sdk-chimesdkidentity-1.12.1
+ 87.jar aws-java-sdk-opensearch-1.12.187.jar jersey-media-jaxb-2.30.jar 
+ aws-java-sdk-models-1.12.187.jar aws-java-sdk-iotjobsdataplane-1.12.187
+ .jar listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar aws
+ -java-sdk-xray-1.12.187.jar aws-java-sdk-iottwinmaker-1.12.187.jar antl
+ r4-runtime-4.8-1.jar aws-java-sdk-macie-1.12.187.jar aws-java-sdk-1.12.
+ 187.jar commons-compiler-3.0.16.jar aws-java-sdk-s3outposts-1.12.187.ja
+ r aopalliance-repackaged-2.6.1.jar aws-java-sdk-lex-1.12.187.jar aws-ja
+ va-sdk-datapipeline-1.12.187.jar commons-validator-1.6.jar joda-time-2.
+ 8.2.jar lz4-java-1.7.1.jar ibm-cos-java-sdk-2.8.0.jar jackson-jaxrs-bas
+ e-2.9.5.jar aws-java-sdk-qldbsession-1.12.187.jar netty-resolver-4.1.72
+ .Final.jar aws-java-sdk-iotsitewise-1.12.187.jar hadoop-auth-3.2.0.jar 
+ kryo-shaded-4.0.2.jar jackson-core-asl-1.9.13.jar aws-java-sdk-wellarch
+ itected-1.12.187.jar aws-java-sdk-api-gateway-1.12.187.jar aws-java-sdk
+ -glacier-1.12.187.jar aws-java-sdk-lookoutequipment-1.12.187.jar aws-ja
+ va-sdk-securityhub-1.12.187.jar aws-java-sdk-polly-1.12.187.jar aws-jav
+ a-sdk-core-1.12.187.jar aws-java-sdk-ssm-1.12.187.jar aws-java-sdk-medi
+ astore-1.12.187.jar aws-java-sdk-swf-libraries-1.11.22.jar accessors-sm
+ art-1.2.jar aws-java-sdk-rdsdata-1.12.187.jar aws-java-sdk-amplifybacke
+ nd-1.12.187.jar commons-io-2.7.jar aws-java-sdk-backup-1.12.187.jar htt
+ pclient-4.5.13.jar aws-java-sdk-docdb-1.12.187.jar aws-java-sdk-cognito
+ sync-1.12.187.jar commons-beanutils-1.9.3.jar aws-java-sdk-wafv2-1.12.1
+ 87.jar kerb-util-1.0.1.jar aws-java-sdk-appstream-1.12.187.jar aws-java
+ -sdk-iam-1.12.187.jar hamcrest-core-1.1.jar commons-digester-1.8.1.jar 
+ aws-java-sdk-panorama-1.12.187.jar json4s-ast_2.12-3.7.0-M5.jar gson-2.
+ 8.6.jar aws-java-sdk-iotanalytics-1.12.187.jar aws-java-sdk-imagebuilde
+ r-1.12.187.jar aws-java-sdk-cloudwatchevidently-1.12.187.jar curator-fr
+ amework-2.13.0.jar aws-java-sdk-migrationhubconfig-1.12.187.jar aws-jav
+ a-sdk-elasticbeanstalk-1.12.187.jar aws-java-sdk-lightsail-1.12.187.jar
+  commons-cli-1.2.jar javax.inject-1.jar aws-java-sdk-ses-1.12.187.jar a
+ ws-java-sdk-identitystore-1.12.187.jar aws-java-sdk-timestreamquery-1.1
+ 2.187.jar aws-java-sdk-elasticloadbalancing-1.12.187.jar aws-java-sdk-t
+ ransfer-1.12.187.jar scala-library-2.12.10.jar aws-java-sdk-timestreamw
+ rite-1.12.187.jar aws-java-sdk-pinpoint-1.12.187.jar spark-network-shuf
+ fle_2.12-3.1.3.jar aws-java-sdk-cloud9-1.12.187.jar aws-java-sdk-opswor
+ ks-1.12.187.jar commons-logging-1.2.jar okio-1.6.0.jar commons-compress
+ -1.8.1.jar jackson-core-2.12.6.jar aws-java-sdk-honeycode-1.12.187.jar 
+ aws-java-sdk-ecs-1.12.187.jar aws-java-sdk-autoscalingplans-1.12.187.ja
+ r aws-java-sdk-simpleworkflow-1.12.187.jar aws-java-sdk-kafka-1.12.187.
+ jar aws-java-sdk-ec2-1.12.187.jar aws-java-sdk-sagemakerfeaturestorerun
+ time-1.12.187.jar joss-0.10.3.jar aws-java-sdk-organizations-1.12.187.j
+ ar aws-java-sdk-location-1.12.187.jar aws-java-sdk-comprehendmedical-1.
+ 12.187.jar aws-java-sdk-efs-1.12.187.jar commons-codec-1.15.jar aws-jav
+ a-sdk-auditmanager-1.12.187.jar aws-java-sdk-resourcegroups-1.12.187.ja
+ r netty-buffer-4.1.72.Final.jar jackson-jaxrs-json-provider-2.9.5.jar s
+ nappy-java-1.1.8.2.jar jersey-common-2.30.jar aws-java-sdk-devicefarm-1
+ .12.187.jar jul-to-slf4j-1.7.30.jar httpcore5-h2-5.0.2.jar stocator-1.1
+ .4.jar aws-java-sdk-managedblockchain-1.12.187.jar arrow-memory-core-2.
+ 0.0.jar ibm-cos-java-sdk-kms-2.8.0.jar jakarta.activation-api-1.2.1.jar
+  aws-java-sdk-acm-1.12.187.jar aws-java-sdk-workmail-1.12.187.jar aws-j
+ ava-sdk-mq-1.12.187.jar aws-java-sdk-memorydb-1.12.187.jar aws-java-sdk
+ -codestar-1.12.187.jar aws-java-sdk-waf-1.12.187.jar scala-reflect-2.12
+ .10.jar aws-java-sdk-costandusagereport-1.12.187.jar aws-java-sdk-brake
+ t-1.12.187.jar aws-java-sdk-schemas-1.12.187.jar aws-java-sdk-rekogniti
+ on-1.12.187.jar curator-recipes-2.13.0.jar arrow-vector-2.0.0.jar aws-j
+ ava-sdk-sesv2-1.12.187.jar aws-java-sdk-redshift-1.12.187.jar jmespath-
+ java-1.12.187.jar metrics-jvm-4.1.1.jar zstd-jni-1.4.8-1.jar woodstox-c
+ ore-5.0.3.jar aws-java-sdk-worklink-1.12.187.jar aws-java-sdk-alexaforb
+ usiness-1.12.187.jar aws-java-sdk-finspace-1.12.187.jar spark-sketch_2.
+ 12-3.1.3.jar jsr305-3.0.2.jar metrics-json-4.1.1.jar aws-java-sdk-outpo
+ sts-1.12.187.jar aws-java-sdk-pinpointsmsvoice-1.12.187.jar checker-qua
+ l-3.5.0.jar spotbugs-annotations-3.1.9.jar aws-java-sdk-keyspaces-1.12.
+ 187.jar aws-java-sdk-iotfleethub-1.12.187.jar stax2-api-3.1.4.jar aws-j
+ ava-sdk-apigatewayv2-1.12.187.jar aws-java-sdk-elasticinference-1.12.18
+ 7.jar aws-java-sdk-directory-1.12.187.jar ibm-cos-java-sdk-s3-2.8.0.jar
+  aws-java-sdk-emr-1.12.187.jar aws-java-sdk-health-1.12.187.jar okhttp-
+ 2.7.5.jar aws-java-sdk-stepfunctions-1.12.187.jar aws-java-sdk-mediasto
+ redata-1.12.187.jar aws-java-sdk-cloudfront-1.12.187.jar json4s-scalap_
+ 2.12-3.7.0-M5.jar aws-java-sdk-medialive-1.12.187.jar dnsjava-2.1.7.jar
+  kerb-identity-1.0.1.jar aws-java-sdk-dataexchange-1.12.187.jar failure
+ access-1.0.1.jar aws-java-sdk-sagemakerruntime-1.12.187.jar aws-java-sd
+ k-route53recoverycluster-1.12.187.jar aws-java-sdk-robomaker-1.12.187.j
+ ar aws-java-sdk-pinpointemail-1.12.187.jar netty-common-4.1.72.Final.ja
+ r aws-java-sdk-eventbridge-1.12.187.jar aws-java-sdk-budgets-1.12.187.j
+ ar re2j-1.1.jar hadoop-common-3.2.0.jar hadoop-mapreduce-client-common-
+ 3.2.0.jar hive-storage-api-2.7.2.jar aws-java-sdk-servermigration-1.12.
+ 187.jar aws-java-sdk-cloudhsm-1.12.187.jar aws-java-sdk-elastictranscod
+ er-1.12.187.jar nimbus-jose-jwt-4.41.1.jar aws-java-sdk-redshiftdataapi
+ -1.12.187.jar aws-java-sdk-qldb-1.12.187.jar aws-java-sdk-workspaces-1.
+ 12.187.jar aws-java-sdk-mgn-1.12.187.jar aws-java-sdk-migrationhub-1.12
+ .187.jar json-smart-2.3.jar aws-java-sdk-mediaconnect-1.12.187.jar aws-
+ java-sdk-kinesisvideosignalingchannels-1.12.187.jar aws-java-sdk-worksp
+ acesweb-1.12.187.jar aws-java-sdk-mediapackage-1.12.187.jar aws-java-sd
+ k-neptune-1.12.187.jar aws-java-sdk-snowdevicemanagement-1.12.187.jar a
+ ws-java-sdk-chimesdkmeetings-1.12.187.jar kerb-server-1.0.1.jar aws-jav
+ a-sdk-autoscaling-1.12.187.jar aws-java-sdk-events-1.12.187.jar spark-c
+ atalyst_2.12-3.1.3.jar junit-4.10.jar kerby-asn1-1.0.1.jar netty-tcnati
+ ve-classes-2.0.46.Final.jar jackson-module-jaxb-annotations-2.9.5.jar o
+ rc-shims-1.5.13.jar aws-java-sdk-rds-1.12.187.jar py4j-0.10.9.jar aws-j
+ ava-sdk-cloudhsmv2-1.12.187.jar aws-java-sdk-migrationhubrefactorspaces
+ -1.12.187.jar aws-java-sdk-detective-1.12.187.jar error_prone_annotatio
+ ns-2.3.4.jar aws-java-sdk-marketplacecommerceanalytics-1.12.187.jar aws
+ -java-sdk-ec2instanceconnect-1.12.187.jar kerb-core-1.0.1.jar aws-java-
+ sdk-codepipeline-1.12.187.jar aws-java-sdk-connectcontactlens-1.12.187.
+ jar jakarta.activation-1.2.1.jar aws-java-sdk-marketplacecatalog-1.12.1
+ 87.jar jersey-container-servlet-2.30.jar aws-java-sdk-cloudformation-1.
+ 12.187.jar hk2-utils-2.6.1.jar aws-java-sdk-iotthingsgraph-1.12.187.jar
+  jakarta.ws.rs-api-2.1.6.jar commons-lang3-3.10.jar aws-java-sdk-route5
+ 3recoveryreadiness-1.12.187.jar aws-java-sdk-eks-1.12.187.jar arrow-for
+ mat-2.0.0.jar ion-java-1.2.0.jar aws-java-sdk-ssmcontacts-1.12.187.jar 
+ aws-java-sdk-amplify-1.12.187.jar orc-core-1.5.13.jar aws-java-sdk-lice
+ nsemanager-1.12.187.jar hadoop-yarn-api-3.2.0.jar aws-java-sdk-gamelift
+ -1.12.187.jar aws-java-sdk-devopsguru-1.12.187.jar aws-java-sdk-service
+ quotas-1.12.187.jar hadoop-yarn-client-3.2.0.jar commons-crypto-1.1.0.j
+ ar aws-java-sdk-sqs-1.12.187.jar aws-java-sdk-emrcontainers-1.12.187.ja
+ r aws-java-sdk-snowball-1.12.187.jar aws-java-sdk-accessanalyzer-1.12.1
+ 87.jar aws-java-sdk-codeguruprofiler-1.12.187.jar kerby-config-1.0.1.ja
+ r aws-java-sdk-secretsmanager-1.12.187.jar aws-java-sdk-marketplaceenti
+ tlement-1.12.187.jar aws-java-sdk-simpledb-1.12.187.jar guice-4.0.jar a
+ ws-java-sdk-applicationautoscaling-1.12.187.jar jakarta.validation-api-
+ 2.0.2.jar aws-java-sdk-codeartifact-1.12.187.jar aws-java-sdk-chimesdkm
+ essaging-1.12.187.jar netty-all-4.1.51.Final.jar aws-java-sdk-fis-1.12.
+ 187.jar aws-java-sdk-ssmincidents-1.12.187.jar kerb-admin-1.0.1.jar com
+ mons-net-3.6.jar aws-java-sdk-account-1.12.187.jar aws-java-sdk-prometh
+ eus-1.12.187.jar aws-java-sdk-quicksight-1.12.187.jar aws-java-sdk-iote
+ vents-1.12.187.jar aws-java-sdk-forecast-1.12.187.jar aws-java-sdk-appm
+ esh-1.12.187.jar aws-java-sdk-resourcegroupstaggingapi-1.12.187.jar jer
+ sey-container-servlet-core-2.30.jar aws-java-sdk-sagemaker-1.12.187.jar
+  compress-lzf-1.0.3.jar aws-java-sdk-translate-1.12.187.jar jackson-dat
+ aformat-cbor-2.12.6.jar aws-java-sdk-iot1clickdevices-1.12.187.jar aws-
+ java-sdk-connect-1.12.187.jar aws-java-sdk-iot-1.12.187.jar leveldbjni-
+ all-1.8.jar aws-java-sdk-codecommit-1.12.187.jar parquet-hadoop-1.10.1.
+ jar aws-java-sdk-iotwireless-1.12.187.jar parquet-format-2.4.0.jar aws-
+ java-sdk-codegurureviewer-1.12.187.jar aws-java-sdk-apigatewaymanagemen
+ tapi-1.12.187.jar aws-java-sdk-connectwisdom-1.12.187.jar aws-java-sdk-
+ mobile-1.12.187.jar aws-java-sdk-ecrpublic-1.12.187.jar protobuf-java-3
+ .14.0.jar aws-java-sdk-lexruntimev2-1.12.187.jar log4j-1.2.17.jar aws-j
+ ava-sdk-dms-1.12.187.jar arrow-memory-netty-2.0.0.jar aws-java-sdk-pers
+ onalizeevents-1.12.187.jar aws-java-sdk-cognitoidentity-1.12.187.jar ht
+ tpclient5-5.0.3.jar ibm-cos-java-sdk-core-2.8.0.jar kerb-crypto-1.0.1.j
+ ar avro-mapred-1.8.2-hadoop2.jar jersey-client-2.30.jar aws-java-sdk-su
+ pport-1.12.187.jar spark-unsafe_2.12-3.1.3.jar kerby-pkix-1.0.1.jar aws
+ -java-sdk-healthlake-1.12.187.jar aws-java-sdk-globalaccelerator-1.12.1
+ 87.jar hadoop-client-3.2.0.jar aws-java-sdk-sns-1.12.187.jar json-simpl
+ e-1.1.1.jar aws-java-sdk-kinesis-1.12.187.jar aws-java-sdk-comprehend-1
+ .12.187.jar aws-java-sdk-kms-1.12.187.jar aws-java-sdk-ssooidc-1.12.187
+ .jar token-provider-1.0.1.jar htrace-core4-4.1.0-incubating.jar avro-1.
+ 8.2.jar j2objc-annotations-1.3.jar commons-configuration2-2.1.1.jar aws
+ -java-sdk-ram-1.12.187.jar aws-java-sdk-storagegateway-1.12.187.jar com
+ mons-lang-2.6.jar aws-java-sdk-acmpca-1.12.187.jar aws-java-sdk-voiceid
+ -1.12.187.jar tink-1.6.0.jar parquet-encoding-1.10.1.jar aws-java-sdk-c
+ loudcontrolapi-1.12.187.jar slf4j-api-1.7.30.jar aws-java-sdk-elasticac
+ he-1.12.187.jar aws-java-sdk-fsx-1.12.187.jar aws-java-sdk-config-1.12.
+ 187.jar aws-java-sdk-elasticloadbalancingv2-1.12.187.jar aws-java-sdk-m
+ ediaconvert-1.12.187.jar aws-java-sdk-s3control-1.12.187.jar aws-java-s
+ dk-s3-1.12.187.jar kerb-common-1.0.1.jar xz-1.5.jar netty-handler-4.1.7
+ 2.Final.jar aws-java-sdk-nimblestudio-1.12.187.jar aws-java-sdk-grounds
+ tation-1.12.187.jar aws-java-sdk-fms-1.12.187.jar aws-java-sdk-route53r
+ ecoverycontrolconfig-1.12.187.jar jakarta.annotation-api-1.3.5.jar aws-
+ java-sdk-computeoptimizer-1.12.187.jar jackson-databind-2.12.6.1.jar ha
+ doop-annotations-3.2.0.jar aws-java-sdk-gamesparks-1.12.187.jar scala-p
+ arser-combinators_2.12-1.1.2.jar aws-java-sdk-finspacedata-1.12.187.jar
+  aws-java-sdk-discovery-1.12.187.jar stream-2.9.6.jar commons-collectio
+ ns-3.2.2.jar slf4j-log4j12-1.7.30.jar aws-java-sdk-logs-1.12.187.jar aw
+ s-java-sdk-codebuild-1.12.187.jar oro-2.0.8.jar flatbuffers-java-1.9.0.
+ jar json4s-jackson_2.12-3.7.0-M5.jar jaxb-api-2.2.11.jar aws-java-sdk-r
+ oute53-1.12.187.jar jackson-module-paranamer-2.10.0.jar aws-java-sdk-wo
+ rkmailmessageflow-1.12.187.jar aws-java-sdk-servicediscovery-1.12.187.j
+ ar objenesis-2.5.1.jar osgi-resource-locator-1.0.3.jar aws-java-sdk-sav
+ ingsplans-1.12.187.jar aws-java-sdk-frauddetector-1.12.187.jar activati
+ on-1.1.1.jar commons-math3-3.4.1.jar orc-mapreduce-1.5.13.jar univocity
+ -parsers-2.9.1.jar aws-java-sdk-servicecatalog-1.12.187.jar netty-trans
+ port-4.1.72.Final.jar hadoop-mapreduce-client-jobclient-3.2.0.jar aws-j
+ ava-sdk-synthetics-1.12.187.jar aws-java-sdk-workdocs-1.12.187.jar aws-
+ java-sdk-backupgateway-1.12.187.jar spark-kvstore_2.12-3.1.3.jar aws-ja
+ va-sdk-codedeploy-1.12.187.jar aws-java-sdk-guardduty-1.12.187.jar jack
+ son-annotations-2.12.6.jar avro-ipc-1.8.2.jar aws-java-sdk-lookoutmetri
+ cs-1.12.187.jar aws-java-sdk-cloudtrail-1.12.187.jar aws-java-sdk-green
+ grassv2-1.12.187.jar netty-codec-4.1.72.Final.jar parquet-column-1.10.1
+ .jar aws-java-sdk-appsync-1.12.187.jar aws-java-sdk-lexmodelbuilding-1.
+ 12.187.jar aws-java-sdk-proton-1.12.187.jar hk2-locator-2.6.1.jar hadoo
+ p-mapreduce-client-core-3.2.0.jar aws-java-sdk-lookoutforvision-1.12.18
+ 7.jar aws-java-sdk-personalize-1.12.187.jar aws-java-sdk-sts-1.12.187.j
+ ar aws-java-sdk-appconfigdata-1.12.187.jar aws-java-sdk-augmentedairunt
+ ime-1.12.187.jar aws-java-sdk-recyclebin-1.12.187.jar aws-java-sdk-ssoa
+ dmin-1.12.187.jar aws-java-sdk-ecr-1.12.187.jar aws-java-sdk-route53res
+ olver-1.12.187.jar hadoop-hdfs-client-3.2.0.jar aws-java-sdk-pi-1.12.18
+ 7.jar aws-java-sdk-marketplacemeteringservice-1.12.187.jar shims-0.9.0.
+ jar jackson-mapper-asl-1.9.13.jar aws-java-sdk-codestarconnections-1.12
+ .187.jar spark-tags_2.12-3.1.3.jar jakarta.inject-2.6.1.jar jcip-annota
+ tions-1.0-1.jar jsp-api-2.1.jar aopalliance-1.0.jar aws-java-sdk-textra
+ ct-1.12.187.jar xbean-asm7-shaded-4.15.jar aws-java-sdk-lakeformation-1
+ .12.187.jar jline-0.9.94.jar aws-java-sdk-ivs-1.12.187.jar parquet-comm
+ on-1.10.1.jar spark-core_2.12-3.1.3.jar aws-java-sdk-ebs-1.12.187.jar a
+ ws-java-sdk-appintegrations-1.12.187.jar aws-java-sdk-datasync-1.12.187
+ .jar aws-java-sdk-pricing-1.12.187.jar aws-java-sdk-migrationhubstrateg
+ yrecommendations-1.12.187.jar aircompressor-0.10.jar
+
