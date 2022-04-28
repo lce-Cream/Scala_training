@@ -1,7 +1,7 @@
 import connection.{COSConnection, DB2Connection, LocalConnection, MySQLConnection}
 
 import dataGeneration.DataFrameGenerator
-import dataTransform.Transform.calculateYearSales
+import dataTransform.DataFrameTransform.calculateYearSales
 
 import util.DefaultConfig
 import util.Spark
@@ -20,32 +20,39 @@ object Main extends App{
         val mode = scala.io.StdIn.readLine("$ ")
 
         mode match {
-            case "db2"    => processDB2()
-            case "cos"    => processCOS()
-            case "mysql"  => processMySQL()
-            case "local"  => processLocal()
-            case "help"   => help()
+            case "db2"    => if (processDB2())   println("DONE") else println("JOB ABORTED")
+            case "cos"    => if (processCOS())   println("DONE") else println("JOB ABORTED")
+            case "mysql"  => if (processMySQL()) println("DONE") else println("JOB ABORTED")
+            case "local"  => if (processLocal()) println("DONE") else println("JOB ABORTED")
+            case "help"   => println(help())
+            case "exit"   => sys.exit(0)
             case other    => {
-                println("Unexpected mode: " + other.toString)
+                println(s"Unexpected mode: $other")
                 println(help())
-                sys.exit(1)
             }
         }
     }
 
     def help(): String = {
         """
-          |Choose mode to run process.
-          |Mods available: db2, cos, mysql, local.
+          |Choose mode to run data load and data transform processes.
+          |Commands:
+          |  db2      Launch process using IBM DB2
+          |  cos      Launch process using IBM COS
+          |  mysql    Launch process using MySQL
+          |  local    Launch process using local filesystem
+          |  exit     Exit this REPL
           |""".stripMargin
     }
 
     def processDB2(): Boolean = {
+        val table = config("spark.db2.table")
+
         try{
             val DB2Connection = new DB2Connection(DefaultConfig.DB2Credentials ++ config) // create a connection
-            DB2Connection.write("sales_data", df_annual)                                  // write to your connection
-            DB2Connection.read("sales_data").show()                                       // read from the connection and show
-            println(s"Rows inserted: ${DB2Connection.getCount("sales_data")}")            // count number of inserted rows
+//            DB2Connection.write(table, df_annual)                                  // write to your connection
+            DB2Connection.read(table).show()                                       // read from the connection and show
+//            println(s"Rows inserted: ${DB2Connection.getCount(table)}")            // count number of inserted rows
             true
         }
         catch {
@@ -59,7 +66,7 @@ object Main extends App{
     def processCOS(): Boolean = {
         try{
             val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config) // create a connection
-            COSConnection.save(df_annual, "sales.csv")                                    // write to the connection
+//            COSConnection.save(df_annual, "sales.csv")                                    // write to the connection
             COSConnection.read("sales.csv").show                                          // read and show
             COSConnection.listFiles().foreach(println)                                    // list all files in cos
             true
@@ -74,7 +81,7 @@ object Main extends App{
 
     def processMySQL(): Boolean = {
         try{
-            val MySQLConnection = new DB2Connection(DefaultConfig.MySQLCredentials ++ config) // create a connection
+            val MySQLConnection = new MySQLConnection(DefaultConfig.MySQLCredentials ++ config) // create a connection
             MySQLConnection.write("sales_data", df_annual)                                    // write to your connection
             MySQLConnection.read("sales_data").show()                                         // read from connection and show
             println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}")              // count number of inserted rows

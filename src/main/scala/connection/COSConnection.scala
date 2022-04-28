@@ -27,7 +27,7 @@ class COSConnection(conf: Map[String, String]) {
     }
 
     def read(filename: String): DataFrame = {
-        Spark.sparkSession.read.csv(s"cos://$bucket/$filename")
+        Spark.sparkSession.read.option("header", "true").csv(s"cos://$bucket/$filename")
     }
 
     def listFiles(): Array[String] = {

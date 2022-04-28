@@ -8,7 +8,7 @@ object Spark {
         LogManager.getLogger("org.apache.spark").setLevel(Level.ERROR)
 
         val spark = SparkSession.builder
-//            .master("local[1]")
+            .master("local[1]")
             .appName("Training application")
             .getOrCreate()
         spark
