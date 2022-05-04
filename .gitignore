@@ -2,6 +2,7 @@
 .idea
 target
 project
+lib
 other
 out
 test.sc

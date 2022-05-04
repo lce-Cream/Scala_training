@@ -5,6 +5,7 @@ object CLIParser {
     val options = new Options()
     val parser = new BasicParser()
     val formatter = new HelpFormatter()
+    val a = new OptionGroup()
 
     options.addOption("dur", "spark.db2.url", true, "url for db2 instance")
     options.addOption("dus", "spark.db2.user", true, "username for db2 instance")
