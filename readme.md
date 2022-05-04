@@ -1,12 +1,10 @@
-# will be updated soon
-
-### Description
+## Description
 This application provides a few classes for work with IBM DB2 cloud storage, IBM COS (cloud object storage), local storage,
 MySQL database and data generation.
 Here you can read data from using various connection types, transform data in dataframes with aggregation,
 save dataframes to your connections and run it all in spark-submit.
 
-### Requirements
+## Requirements
 It's strongly recommended using these versions for stable work.
 | Name | Version |
 | ------ | ------ |
@@ -14,10 +12,12 @@ It's strongly recommended using these versions for stable work.
 | Spark | 3.13    |
 | Hadoop| 3.2     |
 | SBT   | 1.5.8   |
-| OS    | Windows |
 | JDK   | 15      |
+| Docker| 4.7.1   |
+| OS    | Windows |
 
-### Setup
+## Setup
+### Installation
 Clone this repo.
 ```shell
 $ git clone https://github.com/lce-Cream/Scala_training.git
@@ -31,117 +31,52 @@ $ sbt reload
 Follow further instructions.
 
 ### Configuration
-Configuration can be set using config file, and it looks like this. Every value except of #spark ones is compulsory.
+Configuration can be set using environment variables, and it looks like this. Every value except the ones under #spark is compulsory.
 ```text
 #spark
-spark.master                     local[1]
-spark.driver.memory              1g
+# spark.driver.memory=1g
+spark.master=local[1]
 
 #db2
-spark.db2.url                    jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true;
-spark.db2.user                   rsg
-spark.db2.password               oOW
+spark.db2.url=jdbc:db2://qwerty123.databases.appdomain.cloud:30699/bludb:sslConnection=true;
+spark.db2.user=qwerty123
+spark.db2.password=qwerty123
+spark.db2.table=ARSENI_SALES_DATA
+spark.db2.driver=com.ibm.db2.jcc.DB2Driver
 
 #cos
-spark.cos.access.key             b8fced
-spark.cos.secret.key             9d7d8b
-spark.cos.endpoint               s3.fra.eu.cloud-object-storage
+spark.cos.access.key=qwerty123
+spark.cos.secret.key=qwerty123
+spark.cos.endpoint=s3.fra.eu.cloud-object-storage
+spark.cos.bucket=iba-ats-training-d3bf1ce5
+spark.cos.service=arseni
 
 #mysql
-spark.mysql.url                  jdbc:mysql://localhost:3306/sample_database
-spark.mysql.user                 root
-spark.mysql.password             root
-spark.mysql.table                data
+spark.mysql.url=jdbc:mysql://localhost:3306/sample_database
+spark.mysql.user=root
+spark.mysql.password=root
+spark.mysql.table=data
 
 #local
-spark.local.path                 ./data
+spark.local.path=./data
 ```
 
-However, there are default config in project's DefaultConfig.scala file in case you want to keep config file shorter.
+However, there is default config in project's DefaultConfig.scala file in case you want to keep config file shorter.
 Every value in this config is overloaded by config file above.
-```scala
-package util
 
-object DefaultConfig {
-    val DB2Credentials = Map(
-        "spark.db2.url"      -> "jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true;",
-        "spark.db2.user"     -> "rsg",
-        "spark.db2.password" -> "oOW"
-    )
-
-    val COSCredentials = Map(
-        "spark.cos.access.key"     -> "b8fced",
-        "spark.cos.secret.key"     -> "9d7d8b",
-        "spark.cos.endpoint"       -> "s3.fra.eu.cloud-object-storage",
-    )
-
-    val MySQLCredentials = Map(
-        "spark.mysql.url"      -> "jdbc:mysql://localhost:3306/sample_database",
-        "spark.mysql.user"     -> "root",
-        "spark.mysql.password" -> "root",
-        "spark.mysql.table"    -> "data",
-    )
-
-    val LocalCredentials = Map(
-        "spark.local.path" -> "./",
-    )
-}
-```
-
-### Usage
-After config setup you are ready to go. Write your code in Main.scala. Example is listed below.
-
-```scala
-import connection.{COSConnection, DB2Connection, LocalConnection, MySQLConnection}
-import dataGeneration.DataFrameGenerator
-import dataTransform.DataFrameTransform.calculateYearSales
-import util.DefaultConfig
-import util.Spark
-
-object Main extends App {
-    val config = Spark.sparkSession.conf.getAll // get spark config
-    val df = DataFrameGenerator.generateSalesConcise(10) // generate sales DataFrame
-    val df_annual = calculateYearSales(df) // transform it by calculating annual sales
-
-    // db2
-    val DB2Connection = new DB2Connection(DefaultConfig.DB2Credentials ++ config) // create a connection
-    if (DB2Connection.write("sales_data", df_annual)) { // write to your connection
-        DB2Connection.read("sales_data").show() // read from the connection and show
-        println(s"Rows inserted: ${DB2Connection.getCount("sales_data")}") // count number of inserted rows
-    }
-
-    // cos
-    val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config) // create a connection
-    if (COSConnection.save(df_annual, "arseni-storage", "sales.csv")) { // write to the connection
-        COSConnection.read("arseni-storage", "sales.csv").show // read and show
-        COSConnection.listFiles("arseni-storage").foreach(println) // list all files in cos
-    }
-
-    //mysql
-    val MySQLConnection = new DB2Connection(DefaultConfig.MySQLCredentials ++ config) // create a connection
-    if (MySQLConnection.write("sales_data", df_annual)) { // write to your connection
-        MySQLConnection.read("sales_data").show() // read from connection and show
-        println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}") // count number of inserted rows
-    }
-
-    // local
-    val LocalConnection = new LocalConnection(DefaultConfig.LocalCredentials ++ config) // create a connection
-    if (LocalConnection.save(df, "test.csv", "overwrite")) { // write to the connection
-        LocalConnection.read("test.csv").show
-    }
-}
-```
-
-### Launch
+## Run
+There are three ways to run the application.
+### SBT
 In project run.
 ```shell
 $ sbt run
 ```
 
+### Spark-submit
 Or spark-submit could be of assistance. But before that application needs to be packed in one jar file.
-It can be done by IDE's artifact functionality or by using sbt assembly plugin.
+It can be done by IDE's artifact functionality or by using sbt package command.
 ```shell
-$ sbt assebmly
+$ sbt package
 ```
 
 You can specify all spark-submit parameters directly like this.
@@ -163,14 +98,60 @@ spark-submit.cmd \
 ./Application.jar
 ```
 
-Or do it shorter by using spark-config.conf file described in configuration step. Do not forget to pack it all in jar.
+Or do it shorter by using spark-config.conf file described in configuration step. Do not forget to pack source code in jar.
 ```text
 spark-submit.cmd \
 --properties-file ./spark-config.conf \
 --class Main ./Application.jar
 ```
 
-### Results
+### Docker
+Build docker image. Make necessary changes to a default dockerfile.
+```dockerfile
+FROM bitnami/spark:latest
+# jar dependencies
+COPY ./lib/* /application/lib/
+# application source packed in jar
+COPY ./out/artifacts/test_4_jar/test_4.jar /application/
+# command to run spark submit job
+CMD ["spark-submit",\
+     "--jars", "/application/lib/*",\
+     "--class", "Main",\
+     "/application/test_4.jar"]
+```
+
+Build an image.
+```bash
+docker build -f ./Dockerfile --cache-from bitnami/spark:latest -t myapp:test_image .
+```
+Run container.
+```bash
+winpty docker run -it --env-file ./src/main/scala/spark-config.env --name myapp_test_env myapp:test_container
+```
+Winpty here is for Windows compatibility.
+
+## Usage
+After config setup you are ready to go. Here's help message to get started.
+```text
+Choose mode to run data load and data transform processes.
+
+Mods:
+  db2      Launch process using IBM DB2.
+  cos      Launch process using IBM COS.
+  mysql    Launch process using MySQL.
+  local    Launch process using local filesystem.
+  exit     Exit this REPL.
+
+Actions:
+  read    Read data.
+  write   Write data.
+
+Examples:
+  db2 read 10  // show 10 records from db2 storage.
+  cos write 20 // write 20 records to cos storage.
+```
+
+## Results
 Every connection type code described above gives roughly the same result.
 Firstly month sales DataFrame is generated,
 after that it transforms by calculating annual sales,
@@ -218,5 +199,3 @@ Annual sales DataFrame example.
 |         7|            0|2018|572053|
 +----------+-------------+----+------+
 ```
-
-
