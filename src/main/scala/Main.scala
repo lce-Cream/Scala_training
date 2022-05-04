@@ -11,6 +11,7 @@ import scala.util.Try
 
 object Main extends App{
     val config = Environment.getMap ++ Spark.sparkSession.conf.getAll
+    config.foreach(println)
 
     def readDB2(number: Int): Option[DataFrame] = {
         val table = config("spark.db2.table")
@@ -141,7 +142,7 @@ object Main extends App{
           |
           |Examples:
           |  db2 read 10  // show 10 records from db2 storage.
-          |  cos write 20 // write 10 records to cos storage.
+          |  cos write 20 // write 20 records to cos storage.
           |""".stripMargin
     }
 
