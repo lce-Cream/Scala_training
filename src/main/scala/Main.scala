@@ -1,34 +1,125 @@
 import connection.{COSConnection, DB2Connection, LocalConnection, MySQLConnection}
-
+import org.apache.spark.sql.DataFrame
 import dataGeneration.DataFrameGenerator
 import dataTransform.DataFrameTransform.calculateYearSales
-
 import util.DefaultConfig
-import util.Spark
 import util.Environment
-import util.CLIParser
+import util.Spark
+
+import scala.util.control.Breaks._
+import scala.util.Try
 
 object Main extends App{
-//    val config = Spark.sparkSession.conf.getAll // get spark config
-    val config = Environment.getMap             // get spark config from environment variables
+    val config = Environment.getMap ++ Spark.sparkSession.conf.getAll
 
-    val df = DataFrameGenerator.generateSalesConcise(10) // generate sales DataFrame
-    val df_annual = calculateYearSales(df)               // transform it by calculating annual sales
+    def readDB2(number: Int): Option[DataFrame] = {
+        val table = config("spark.db2.table")
+        try {
+            val DB2Connection = new DB2Connection(DefaultConfig.DB2Credentials ++ config)
+            Some(DB2Connection.read(table).limit(number))
+        }
+        catch {
+            case e: Exception =>
+                println(e.getMessage)
+                None
+        }
+    }
+
+    def writeDB2(number: Int): Boolean = {
+        val table = config("spark.db2.table")
+
+        try {
+            val df = DataFrameGenerator.generateSalesConcise(number)
+            val df_annual = calculateYearSales(df)
+            val DB2Connection = new DB2Connection(DefaultConfig.DB2Credentials ++ config)
+            DB2Connection.write(table, df_annual)
+        }
+        catch {
+            case e: Exception =>
+                println(e.getMessage)
+                false
+        }
+    }
+
+    def readCOS(number: Int): Option[DataFrame] = {
+        try {
+            val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config)
+            Some(COSConnection.read("sales.csv").limit(number))
+        }
+        catch {
+            case e: Exception =>
+                println(e.getMessage)
+                None
+        }
+    }
+
+    def writeCOS(number: Int): Boolean = {
+        try {
+            val df = DataFrameGenerator.generateSalesConcise(number)
+            val df_annual = calculateYearSales(df)
+            val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config)
+            COSConnection.save(df_annual, "sales.csv")
+        }
+        catch {
+            case e: Exception =>
+                println(e.getMessage)
+                false
+        }
+    }
+
+    def checkArguments(args: Array[String]): Boolean = {
+        val mods = List("db2", "cos")
+        val actions = List("read", "write")
+        (
+          args.length == 3
+          && Try(mods.contains(args(0))).isSuccess
+          && Try(actions.contains(args(1))).isSuccess
+          && Try(args(2).toInt).isSuccess
+        ) || List("help", "exit").contains(args(0))
+    }
 
     // console event loop
     while (true){
-        val mode = scala.io.StdIn.readLine("$ ")
+        breakable {
+            val args = scala.io.StdIn.readLine("$ ").split(" ")
 
-        mode match {
-            case "db2"    => if (processDB2())   println("DONE") else println("JOB ABORTED")
-            case "cos"    => if (processCOS())   println("DONE") else println("JOB ABORTED")
-            case "mysql"  => if (processMySQL()) println("DONE") else println("JOB ABORTED")
-            case "local"  => if (processLocal()) println("DONE") else println("JOB ABORTED")
-            case "help"   => println(help())
-            case "exit"   => sys.exit(0)
-            case other    => {
-                println(s"Unexpected mode: $other")
+            if (!checkArguments(args)) {
+                println("Incorrect arguments.")
                 println(help())
+                break
+            }
+
+            if (args(0) == "exit") sys.exit(0)
+            if (args(0) == "help") {
+                println(help())
+                break
+            }
+
+            val mode   = args(0)
+            val action = args(1)
+            val number = args(2).toInt
+
+            mode match {
+                case "db2" => {
+                    action match {
+                        case "read"  =>
+                            val df = readDB2(number)
+                            if(df.isDefined) df.get.show else println("JOB ABORTED")
+
+                        case "write" =>
+                            if(writeDB2(number)) println("DONE") else println("JOB ABORTED")
+                    }
+                }
+                case "cos" => {
+                    action match {
+                        case "read"  =>
+                            val df = readCOS(number)
+                            if(df.isDefined) df.get.show else println("JOB ABORTED")
+
+                        case "write" =>
+                            if(writeCOS(number)) println("DONE") else println("JOB ABORTED")
+                    }
+                }
             }
         }
     }
@@ -36,77 +127,69 @@ object Main extends App{
     def help(): String = {
         """
           |Choose mode to run data load and data transform processes.
-          |Commands:
-          |  db2      Launch process using IBM DB2
-          |  cos      Launch process using IBM COS
-          |  mysql    Launch process using MySQL
-          |  local    Launch process using local filesystem
-          |  exit     Exit this REPL
+          |
+          |Mods:
+          |  db2      Launch process using IBM DB2.
+          |  cos      Launch process using IBM COS.
+          |  mysql    Launch process using MySQL.
+          |  local    Launch process using local filesystem.
+          |  exit     Exit this REPL.
+          |
+          |Actions:
+          |  read    Read data.
+          |  write   Write data.
+          |
+          |Examples:
+          |  db2 read 10  // show 10 records from db2 storage.
+          |  cos write 20 // write 10 records to cos storage.
           |""".stripMargin
     }
 
-    def processDB2(): Boolean = {
-        val table = config("spark.db2.table")
-
-        try{
-            val DB2Connection = new DB2Connection(DefaultConfig.DB2Credentials ++ config) // create a connection
-//            DB2Connection.write(table, df_annual)                                  // write to your connection
-            DB2Connection.read(table).show()                                       // read from the connection and show
-//            println(s"Rows inserted: ${DB2Connection.getCount(table)}")            // count number of inserted rows
-            true
-        }
-        catch {
-            case e: Exception => {
-                println(e.getMessage)
-                false
-            }
-        }
-    }
-
-    def processCOS(): Boolean = {
-        try{
-            val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config) // create a connection
-//            COSConnection.save(df_annual, "sales.csv")                                    // write to the connection
-            COSConnection.read("sales.csv").show                                          // read and show
-            COSConnection.listFiles().foreach(println)                                    // list all files in cos
-            true
-        }
-        catch {
-            case e: Exception => {
-                println(e.getMessage)
-                false
-            }
-        }
-    }
-
-    def processMySQL(): Boolean = {
-        try{
-            val MySQLConnection = new MySQLConnection(DefaultConfig.MySQLCredentials ++ config) // create a connection
-            MySQLConnection.write("sales_data", df_annual)                                    // write to your connection
-            MySQLConnection.read("sales_data").show()                                         // read from connection and show
-            println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}")              // count number of inserted rows
-            true
-        }
-        catch {
-            case e: Exception => {
-                println(e.getMessage)
-                false
-            }
-        }
-    }
-
-    def processLocal(): Boolean = {
-        try{
-            val LocalConnection = new LocalConnection(DefaultConfig.LocalCredentials ++ config) // create a connection
-            LocalConnection.save(df, "test.csv", "overwrite")                                   // write to the connection
-            LocalConnection.read("test.csv").show                                               // read and show from the connection
-            true
-        }
-        catch {
-            case e: Exception => {
-                println(e.getMessage)
-                false
-            }
-        }
-    }
+//    def processCOS(): Boolean = {
+//        try{
+//            val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config)
+//            COSConnection.save(df_annual, "sales.csv")
+//            COSConnection.read("sales.csv").show
+//            COSConnection.listFiles().foreach(println)
+//            true
+//        }
+//        catch {
+//            case e: Exception => {
+//                println(e.getMessage)
+//                false
+//            }
+//        }
+//    }
+//
+//
+//    def processMySQL(): Boolean = {
+//        try{
+//            val MySQLConnection = new MySQLConnection(DefaultConfig.MySQLCredentials ++ config)
+//            MySQLConnection.write("sales_data", df_annual)
+//            MySQLConnection.read("sales_data").show()
+//            println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}")
+//            true
+//        }
+//        catch {
+//            case e: Exception => {
+//                println(e.getMessage)
+//                false
+//            }
+//        }
+//    }
+//
+//    def processLocal(): Boolean = {
+//        try{
+//            val LocalConnection = new LocalConnection(DefaultConfig.LocalCredentials ++ config)
+//            LocalConnection.save(df, "test.csv", "overwrite")
+//            LocalConnection.read("test.csv").show
+//            true
+//        }
+//        catch {
+//            case e: Exception => {
+//                println(e.getMessage)
+//                false
+//            }
+//        }
+//    }
 }
