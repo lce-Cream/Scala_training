@@ -69,14 +69,15 @@ object Main extends App{
     }
 
     def checkArguments(args: Array[String]): Boolean = {
-        val mods = List("db2", "cos")
+        val mods = List("db2", "cos", "local")
         val actions = List("read", "write")
-        (
-          args.length == 3
-          && Try(mods.contains(args(0))).isSuccess
-          && Try(actions.contains(args(1))).isSuccess
-          && Try(args(2).toInt).isSuccess
-        ) || List("help", "exit").contains(args(0))
+        Try(
+            args.length == 3
+              && mods.contains(args(0))
+              && actions.contains(args(1))
+              && args(2).toInt.isInstanceOf[Int]
+              || List("help", "exit").contains(args(0))
+        ).getOrElse(false)
     }
 
     // console event loop
