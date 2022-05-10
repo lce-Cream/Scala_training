@@ -2,22 +2,20 @@ import connection.{COSConnection, DB2Connection, LocalConnection, MySQLConnectio
 import org.apache.spark.sql.DataFrame
 import dataGeneration.DataFrameGenerator
 import dataTransform.DataFrameTransform.calculateYearSales
-import util.DefaultConfig
-import util.Environment
-import util.Spark
+import util.Config
 
 import scala.util.control.Breaks._
 import scala.util.Try
 
 object Main extends App{
-    val config = Environment.getMap ++ Spark.sparkSession.conf.getAll
+    println("START SUCCESSFUL")
+    val config = Config.getConfig
     config.foreach(println)
 
     def readDB2(number: Int): Option[DataFrame] = {
-        val table = config("spark.db2.table")
         try {
-            val DB2Connection = new DB2Connection(DefaultConfig.DB2Credentials ++ config)
-            Some(DB2Connection.read(table).limit(number))
+            val DB2Connection = new DB2Connection(config)
+            Some(DB2Connection.read().limit(number))
         }
         catch {
             case e: Exception =>
@@ -27,13 +25,11 @@ object Main extends App{
     }
 
     def writeDB2(number: Int): Boolean = {
-        val table = config("spark.db2.table")
-
         try {
             val df = DataFrameGenerator.generateSalesConcise(number)
             val df_annual = calculateYearSales(df)
-            val DB2Connection = new DB2Connection(DefaultConfig.DB2Credentials ++ config)
-            DB2Connection.write(table, df_annual)
+            val DB2Connection = new DB2Connection(config)
+            DB2Connection.write(df_annual)
         }
         catch {
             case e: Exception =>
@@ -44,7 +40,7 @@ object Main extends App{
 
     def readCOS(number: Int): Option[DataFrame] = {
         try {
-            val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config)
+            val COSConnection = new COSConnection(config)
             Some(COSConnection.read("sales.csv").limit(number))
         }
         catch {
@@ -58,13 +54,41 @@ object Main extends App{
         try {
             val df = DataFrameGenerator.generateSalesConcise(number)
             val df_annual = calculateYearSales(df)
-            val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config)
+            val COSConnection = new COSConnection(config)
             COSConnection.save(df_annual, "sales.csv")
         }
         catch {
             case e: Exception =>
                 println(e.getMessage)
                 false
+        }
+    }
+
+    def readLocal(number: Int): Option[DataFrame] = {
+        try{
+            val LocalConnection = new LocalConnection(config)
+            Some(LocalConnection.read("test.csv").limit(number))
+        }
+        catch {
+            case e: Exception => {
+                println(e.getMessage)
+                None
+            }
+        }
+    }
+
+    def writeLocal(number: Int): Boolean = {
+        try {
+            val df = DataFrameGenerator.generateSalesConcise(number)
+            val df_annual = calculateYearSales(df)
+            val LocalConnection = new LocalConnection(config)
+            LocalConnection.save(df_annual, "test.csv")
+        }
+        catch {
+            case e: Exception => {
+                println(e.getMessage)
+                false
+            }
         }
     }
 
@@ -102,7 +126,7 @@ object Main extends App{
             val number = args(2).toInt
 
             mode match {
-                case "db2" => {
+                case "db2" =>
                     action match {
                         case "read"  =>
                             val df = readDB2(number)
@@ -111,8 +135,8 @@ object Main extends App{
                         case "write" =>
                             if(writeDB2(number)) println("DONE") else println("JOB ABORTED")
                     }
-                }
-                case "cos" => {
+
+                case "cos" =>
                     action match {
                         case "read"  =>
                             val df = readCOS(number)
@@ -121,7 +145,16 @@ object Main extends App{
                         case "write" =>
                             if(writeCOS(number)) println("DONE") else println("JOB ABORTED")
                     }
-                }
+
+                case "local" =>
+                    action match {
+                        case "read"  =>
+                            val df = readLocal(number)
+                            if(df.isDefined) df.get.show else println("JOB ABORTED")
+
+                        case "write" =>
+                            if(writeLocal(number)) println("DONE") else println("JOB ABORTED")
+                    }
             }
         }
     }
@@ -147,26 +180,9 @@ object Main extends App{
           |""".stripMargin
     }
 
-//    def processCOS(): Boolean = {
-//        try{
-//            val COSConnection = new COSConnection(DefaultConfig.COSCredentials ++ config)
-//            COSConnection.save(df_annual, "sales.csv")
-//            COSConnection.read("sales.csv").show
-//            COSConnection.listFiles().foreach(println)
-//            true
-//        }
-//        catch {
-//            case e: Exception => {
-//                println(e.getMessage)
-//                false
-//            }
-//        }
-//    }
-//
-//
 //    def processMySQL(): Boolean = {
 //        try{
-//            val MySQLConnection = new MySQLConnection(DefaultConfig.MySQLCredentials ++ config)
+//            val MySQLConnection = new MySQLConnection(config)
 //            MySQLConnection.write("sales_data", df_annual)
 //            MySQLConnection.read("sales_data").show()
 //            println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}")
@@ -180,18 +196,4 @@ object Main extends App{
 //        }
 //    }
 //
-//    def processLocal(): Boolean = {
-//        try{
-//            val LocalConnection = new LocalConnection(DefaultConfig.LocalCredentials ++ config)
-//            LocalConnection.save(df, "test.csv", "overwrite")
-//            LocalConnection.read("test.csv").show
-//            true
-//        }
-//        catch {
-//            case e: Exception => {
-//                println(e.getMessage)
-//                false
-//            }
-//        }
-//    }
 }
