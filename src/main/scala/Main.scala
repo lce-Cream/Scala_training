@@ -9,7 +9,7 @@ import scala.util.Try
 
 object Main {
     private val config = Config.getConfig
-    config.foreach(println)
+//    config.foreach(println)
 
     def readDB2(number: Int): Option[DataFrame] = {
         try {
@@ -131,7 +131,10 @@ object Main {
         // console event loop
         while (true) {
             breakable {
-                if (Try(args = scala.io.StdIn.readLine("$ ").split(" ")).isFailure) break
+                if (Try(args = scala.io.StdIn.readLine("$ ").split(" ")).isFailure) {
+                    Thread.sleep(1000)
+                    break
+                }
 
                 if (!checkArguments(args)) {
                     println("Incorrect arguments.")

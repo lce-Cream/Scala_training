@@ -19,31 +19,19 @@ kubectl logs myapp-deployment-68876d9b75-dthhw
 kubectl get secret
 kubectl get all
 kubectl get pod --watch
+kubectl attach -ti pod/app-deployment-6fffdccd68-bcnt6
 
 kubectl delete deployment app-deployment
 ```
 
 ## Current state & Problems  
   
-Now pod sustains itself and doesn't crush anymore.
+All previous problems were solved by adding tty and stdin keys in deployment.yaml.
 
-```shell
-PS E:\other\Scala practice\ScalaTraining> kubectl get all
-NAME                                  READY   STATUS    RESTARTS   AGE
-pod/app-deployment-67c69fb774-sh2l4   1/1     Running   0          6m25s
-
-NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/app-deployment   1/1     1            1           6m26s
-```
-
-But when I try to view its logs or attach to it, I get this. Seems like scala.io.StdIn.readLine("$ ") just can't
-get a control over process execution. This behaviour is only shown in kubernetes pod, both sbt run and docker container
-start work as intended.
-
-```text
- $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $
- $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $
- $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $
- $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $
- $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ $ ... 
+```yaml
+containers:
+  - name: app-container
+    image: arseni/app
+    tty: true
+    stdin: true
 ```
