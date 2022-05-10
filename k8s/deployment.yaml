@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+spec:
+  selector:
+    matchLabels:
+      app: app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app-container
+          image: arseni/app
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          env:
+            - name: spark.db2.url
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.url
+            - name: spark.db2.user
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.user
+            - name: spark.db2.password
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.password
+            - name: spark.db2.table
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.table
+            - name: spark.cos.access.key
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.access.key
+            - name: spark.cos.secret.key
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.secret.key
+            - name: spark.cos.endpoint
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.endpoint
+            - name: spark.cos.bucket
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.bucket
+            - name: spark.cos.service
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.service
