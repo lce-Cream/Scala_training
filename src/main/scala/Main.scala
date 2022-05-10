@@ -7,14 +7,14 @@ import util.Config
 import scala.util.control.Breaks._
 import scala.util.Try
 
-object Main extends App{
-    println("START SUCCESSFUL")
-    val config = Config.getConfig
+object Main {
+    private val config = Config.getConfig
     config.foreach(println)
 
     def readDB2(number: Int): Option[DataFrame] = {
         try {
             val DB2Connection = new DB2Connection(config)
+            // probably not the most efficient way to do it
             Some(DB2Connection.read().limit(number))
         }
         catch {
@@ -65,7 +65,7 @@ object Main extends App{
     }
 
     def readLocal(number: Int): Option[DataFrame] = {
-        try{
+        try {
             val LocalConnection = new LocalConnection(config)
             Some(LocalConnection.read("test.csv").limit(number))
         }
@@ -104,61 +104,6 @@ object Main extends App{
         ).getOrElse(false)
     }
 
-    // console event loop
-    while (true){
-        breakable {
-            val args = scala.io.StdIn.readLine("$ ").split(" ")
-
-            if (!checkArguments(args)) {
-                println("Incorrect arguments.")
-                println(help())
-                break
-            }
-
-            if (args(0) == "exit") sys.exit(0)
-            if (args(0) == "help") {
-                println(help())
-                break
-            }
-
-            val mode   = args(0)
-            val action = args(1)
-            val number = args(2).toInt
-
-            mode match {
-                case "db2" =>
-                    action match {
-                        case "read"  =>
-                            val df = readDB2(number)
-                            if(df.isDefined) df.get.show else println("JOB ABORTED")
-
-                        case "write" =>
-                            if(writeDB2(number)) println("DONE") else println("JOB ABORTED")
-                    }
-
-                case "cos" =>
-                    action match {
-                        case "read"  =>
-                            val df = readCOS(number)
-                            if(df.isDefined) df.get.show else println("JOB ABORTED")
-
-                        case "write" =>
-                            if(writeCOS(number)) println("DONE") else println("JOB ABORTED")
-                    }
-
-                case "local" =>
-                    action match {
-                        case "read"  =>
-                            val df = readLocal(number)
-                            if(df.isDefined) df.get.show else println("JOB ABORTED")
-
-                        case "write" =>
-                            if(writeLocal(number)) println("DONE") else println("JOB ABORTED")
-                    }
-            }
-        }
-    }
-
     def help(): String = {
         """
           |Choose mode to run data load and data transform processes.
@@ -180,20 +125,79 @@ object Main extends App{
           |""".stripMargin
     }
 
-//    def processMySQL(): Boolean = {
-//        try{
-//            val MySQLConnection = new MySQLConnection(config)
-//            MySQLConnection.write("sales_data", df_annual)
-//            MySQLConnection.read("sales_data").show()
-//            println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}")
-//            true
-//        }
-//        catch {
-//            case e: Exception => {
-//                println(e.getMessage)
-//                false
-//            }
-//        }
-//    }
-//
+    def main(cli_args: Array[String]): Unit = {
+        var args = Array[String]()
+
+        // console event loop
+        while (true) {
+            breakable {
+                if (Try(args = scala.io.StdIn.readLine("$ ").split(" ")).isFailure) break
+
+                if (!checkArguments(args)) {
+                    println("Incorrect arguments.")
+                    println(help())
+                    break
+                }
+
+                if (args(0) == "exit") sys.exit(0)
+                if (args(0) == "help") {
+                    println(help())
+                    break
+                }
+
+                val mode = args(0)
+                val action = args(1)
+                val number = args(2).toInt
+
+                mode match {
+                    case "db2" =>
+                        action match {
+                            case "read" =>
+                                val df = readDB2(number)
+                                if (df.isDefined) df.get.show else println("JOB ABORTED")
+
+                            case "write" =>
+                                if (writeDB2(number)) println("DONE") else println("JOB ABORTED")
+                        }
+
+                    case "cos" =>
+                        action match {
+                            case "read" =>
+                                val df = readCOS(number)
+                                if (df.isDefined) df.get.show else println("JOB ABORTED")
+
+                            case "write" =>
+                                if (writeCOS(number)) println("DONE") else println("JOB ABORTED")
+                        }
+
+                    case "local" =>
+                        action match {
+                            case "read" =>
+                                val df = readLocal(number)
+                                if (df.isDefined) df.get.show else println("JOB ABORTED")
+
+                            case "write" =>
+                                if (writeLocal(number)) println("DONE") else println("JOB ABORTED")
+                        }
+                }
+            }
+        }
+
+        //    def processMySQL(): Boolean = {
+        //        try{
+        //            val MySQLConnection = new MySQLConnection(config)
+        //            MySQLConnection.write("sales_data", df_annual)
+        //            MySQLConnection.read("sales_data").show()
+        //            println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}")
+        //            true
+        //        }
+        //        catch {
+        //            case e: Exception => {
+        //                println(e.getMessage)
+        //                false
+        //            }
+        //        }
+        //    }
+        //
+    }
 }
