@@ -1,6 +1,6 @@
 package util
 
-import util.DefaultConfig.{DB2Credentials, COSCredentials, MySQLCredentials, LocalCredentials}
+import util.Config.{DB2Credentials, COSCredentials, MySQLCredentials, LocalCredentials}
 
 object Environment {
     /** Returns mapping containing all settings found in env with names

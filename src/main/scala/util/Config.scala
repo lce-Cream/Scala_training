@@ -1,6 +1,8 @@
 package util
 
-object DefaultConfig {
+import util.{Spark, Environment}
+
+object Config {
     val DB2Credentials = Map(
         "spark.db2.url"      -> "jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true;",
         "spark.db2.user"     -> "qwerty",
@@ -27,4 +29,13 @@ object DefaultConfig {
     val LocalCredentials = Map(
         "spark.local.path" -> "./data",
     )
+
+    def getConfig: Map[String, String] = {
+        DB2Credentials ++
+        COSCredentials ++
+        MySQLCredentials ++
+        LocalCredentials ++
+        Environment.getMap ++
+        Spark.sparkSession.conf.getAll
+    }
 }
