@@ -1,7 +1,9 @@
 ## Workflow
-build app docker image
+
+build app's docker image  
 start docker daemon
 
+```shell
 minikube start driver=hyperv
 minikube image load arseni/app
 
@@ -19,15 +21,20 @@ kubectl get all
 kubectl get pod --watch
 
 kubectl delete deployment app-deployment
+```
 
-## Current state & Problems 
+## Current state & Problems
+
 Pod launches successfully, secret works correctly, but app crushes right after trying to parse cli arguments (allegedly)
 before I even connect to it. In regular docker container app works flawlessly.
 ---
+```shell
 PS E:\other\ScalaTraining\k8s> kubectl get pod --watch
 NAME                             READY   STATUS             RESTARTS       AGE
 app-deployment-6c498cbf9-48bzp   0/1     CrashLoopBackOff   5 (109s ago)   6m28s
+```
 
+```java
 Exception in thread "main" java.lang.NullPointerException
 at Main$.$anonfun$new$2(Main.scala:110)
 at scala.util.control.Breaks.breakable(Breaks.scala:42)
@@ -54,3 +61,4 @@ at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)
 at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1043)
 at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1052)
 at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+```
