@@ -23,11 +23,13 @@ kubectl get pod --watch
 kubectl delete deployment app-deployment
 ```
 
-## Current state & Problems
-
+## Current state & Problems  
+  
 Pod launches successfully, secret works correctly, but app crushes right after trying to parse cli arguments (allegedly)
 before I even connect to it. In regular docker container app works flawlessly.
+
 ---
+
 ```shell
 PS E:\other\ScalaTraining\k8s> kubectl get pod --watch
 NAME                             READY   STATUS             RESTARTS       AGE
