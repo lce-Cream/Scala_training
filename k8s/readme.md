@@ -43,10 +43,42 @@ docker-image-tool.sh -m -t arseni build
 
 ## State  
 
-Deploying Spark image on minikube.
+1) Trying to run kubernetes job.
+2) Deploying Spark image on minikube.
 
 ## Problems current  
 
+### 1)
+Job doesn't see image, but deployment sees it and runs without any troubles.
+
+```bash
+PS E:\other\Scala practice\ScalaTraining> kubectl get all
+NAME                                  READY   STATUS         RESTARTS   AGE
+pod/app-deployment-6fffdccd68-q7bft   1/1     Running        0          20m
+pod/read-job-h8jmt                    0/1     ErrImagePull   0          18s
+```
+
+When I try to manually launch spark-submit in container.
+
+```bash
+PS E:\other\Scala practice\ScalaTraining> kubectl attach -it app-deployment-6fffdccd68-868ck
+If you don't see a command prompt, try pressing enter.
+
+$ spark-submit --jars /application/lib/* --class Main /application/test_4.jar --mode cos --action read --number 5
+22/05/12 21:25:48 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Exception in thread "main" org.apache.spark.SparkException: No main class set in JAR; please specify one with --class.
+        at org.apache.spark.deploy.SparkSubmit.error(SparkSubmit.scala:972)
+        at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:492)
+        at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:898)
+        at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)
+        at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)
+        at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)
+        at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1043)
+        at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1052)
+        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+```
+
+### 2)
 Errors during Spark image build. When I build it in local docker daemon everything is ok, but with
 '-m' flag in docker-image-tool which is supposed to build the image inside minikube, I get this.
 

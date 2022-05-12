@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: read-job
+spec:
+  template:
+    metadata:
+      name: read-job
+    spec:
+      containers:
+        - name: job-container
+          image: arseni/app
+          imagePullPolicy: IfNotPresent
+          command: [ "spark-submit",\
+                     "--jars", "/application/lib/*",\
+                     "--class", "Main",\
+                     "/application/test_4.jar",\
+                     "--mode","cos",\
+                     "--action","read",\
+                     "--number","5" ]
+      restartPolicy: Never
