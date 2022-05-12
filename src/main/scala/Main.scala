@@ -3,9 +3,7 @@ import org.apache.spark.sql.DataFrame
 import dataGeneration.DataFrameGenerator
 import dataTransform.DataFrameTransform.calculateYearSales
 import util.Config
-
-import scala.util.control.Breaks._
-import scala.util.Try
+import util.CLIParser
 
 object Main {
     private val config = Config.getConfig
@@ -92,115 +90,42 @@ object Main {
         }
     }
 
-    def checkArguments(args: Array[String]): Boolean = {
-        val mods = List("db2", "cos", "local")
-        val actions = List("read", "write")
-        Try(
-            args.length == 3
-              && mods.contains(args(0))
-              && actions.contains(args(1))
-              && args(2).toInt.isInstanceOf[Int]
-              || List("help", "exit").contains(args(0))
-        ).getOrElse(false)
-    }
+    def main(args: Array[String]): Unit = {
+        val argsMap = CLIParser.parse(args)
+        val mode    = argsMap("mode")
+        val action  = argsMap("action")
+        val number  = argsMap("number").toInt
 
-    def help(): String = {
-        """
-          |Choose mode to run data load and data transform processes.
-          |
-          |Mods:
-          |  db2      Launch process using IBM DB2.
-          |  cos      Launch process using IBM COS.
-          |  mysql    Launch process using MySQL.
-          |  local    Launch process using local filesystem.
-          |  exit     Exit this REPL.
-          |
-          |Actions:
-          |  read    Read data.
-          |  write   Write data.
-          |
-          |Examples:
-          |  db2 read 10  // show 10 records from db2 storage.
-          |  cos write 20 // write 20 records to cos storage.
-          |""".stripMargin
-    }
+        mode match {
+            case "db2" =>
+                action match {
+                    case "read" =>
+                        val df = readDB2(number)
+                        if (df.isDefined) df.get.show else println("JOB ABORTED")
 
-    def main(cli_args: Array[String]): Unit = {
-        var args = Array[String]()
-
-        // console event loop
-        while (true) {
-            breakable {
-                if (Try(args = scala.io.StdIn.readLine("$ ").split(" ")).isFailure) {
-                    Thread.sleep(1000)
-                    break
+                    case "write" =>
+                        if (writeDB2(number)) println("DONE") else println("JOB ABORTED")
                 }
 
-                if (!checkArguments(args)) {
-                    println("Incorrect arguments.")
-                    println(help())
-                    break
+            case "cos" =>
+                action match {
+                    case "read" =>
+                        val df = readCOS(number)
+                        if (df.isDefined) df.get.show else println("JOB ABORTED")
+
+                    case "write" =>
+                        if (writeCOS(number)) println("DONE") else println("JOB ABORTED")
                 }
 
-                if (args(0) == "exit") sys.exit(0)
-                if (args(0) == "help") {
-                    println(help())
-                    break
+            case "local" =>
+                action match {
+                    case "read" =>
+                        val df = readLocal(number)
+                        if (df.isDefined) df.get.show else println("JOB ABORTED")
+
+                    case "write" =>
+                        if (writeLocal(number)) println("DONE") else println("JOB ABORTED")
                 }
-
-                val mode = args(0)
-                val action = args(1)
-                val number = args(2).toInt
-
-                mode match {
-                    case "db2" =>
-                        action match {
-                            case "read" =>
-                                val df = readDB2(number)
-                                if (df.isDefined) df.get.show else println("JOB ABORTED")
-
-                            case "write" =>
-                                if (writeDB2(number)) println("DONE") else println("JOB ABORTED")
-                        }
-
-                    case "cos" =>
-                        action match {
-                            case "read" =>
-                                val df = readCOS(number)
-                                if (df.isDefined) df.get.show else println("JOB ABORTED")
-
-                            case "write" =>
-                                if (writeCOS(number)) println("DONE") else println("JOB ABORTED")
-                        }
-
-                    case "local" =>
-                        action match {
-                            case "read" =>
-                                val df = readLocal(number)
-                                if (df.isDefined) df.get.show else println("JOB ABORTED")
-
-                            case "write" =>
-                                if (writeLocal(number)) println("DONE") else println("JOB ABORTED")
-                        }
-                }
-            }
         }
-
-        //    def processMySQL(): Boolean = {
-        //        try{
-        //            val MySQLConnection = new MySQLConnection(config)
-        //            MySQLConnection.write("sales_data", df_annual)
-        //            MySQLConnection.read("sales_data").show()
-        //            println(s"Rows inserted: ${MySQLConnection.getCount("sales_data")}")
-        //            true
-        //        }
-        //        catch {
-        //            case e: Exception => {
-        //                println(e.getMessage)
-        //                false
-        //            }
-        //        }
-        //    }
-        //
     }
 }
