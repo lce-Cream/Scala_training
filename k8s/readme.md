@@ -40,7 +40,6 @@ Build Spark image in minikube docker daemon.
 docker-image-tool.sh -m -t arseni build
 ```
 
-
 ## State  
 
 1) Trying to run kubernetes job.
@@ -49,34 +48,15 @@ docker-image-tool.sh -m -t arseni build
 ## Problems current  
 
 ### 1)
-Job doesn't see image, but deployment sees it and runs without any troubles.
 
-```bash
-PS E:\other\Scala practice\ScalaTraining> kubectl get all
-NAME                                  READY   STATUS         RESTARTS   AGE
-pod/app-deployment-6fffdccd68-q7bft   1/1     Running        0          20m
-pod/read-job-h8jmt                    0/1     ErrImagePull   0          18s
-```
+After I had moved spark-submit call from Dockerfile's CMD to job's args or typed spark-submit directly into
+attached deployment, I got a huge pack of various problems. They include missing classes and libraries,
+malfunctioning secrets and right after I dealt with all these now it seems like the pod can't use internet connection.
+DB2 and COS functions can't see their hosts, and `curl google.com` gets nothing. All of that makes me think,
+that `ENTRYPOINT ["/opt/bitnami/scripts/spark/entrypoint.sh"]` layer in bitnami/spark image, which (as I understand)
+took commands from mine Dockerfile's CMD, and `CMD ["/opt/bitnami/scripts/spark/run.sh"]` are really important,
+and I should try to use them manually instead of seemingly endless suffering in constant problems' abyss. 
 
-When I try to manually launch spark-submit in container.
-
-```bash
-PS E:\other\Scala practice\ScalaTraining> kubectl attach -it app-deployment-6fffdccd68-868ck
-If you don't see a command prompt, try pressing enter.
-
-$ spark-submit --jars /application/lib/* --class Main /application/test_4.jar --mode cos --action read --number 5
-22/05/12 21:25:48 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-Exception in thread "main" org.apache.spark.SparkException: No main class set in JAR; please specify one with --class.
-        at org.apache.spark.deploy.SparkSubmit.error(SparkSubmit.scala:972)
-        at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:492)
-        at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:898)
-        at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)
-        at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)
-        at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)
-        at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1043)
-        at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1052)
-        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
-```
 
 ### 2)
 Errors during Spark image build. When I build it in local docker daemon everything is ok, but with
@@ -224,7 +204,7 @@ Environment variables:
 
 ## Problems solved  
   
-All previous problems with CLI mulfunctioning were solved by adding tty and stdin keys in deployment.yaml.
+All previous problems with CLI malfunctioning were solved by adding tty and stdin keys in deployment.yaml.
 
 ```yaml
 containers:
@@ -233,6 +213,8 @@ containers:
     tty: true
     stdin: true
 ```
+
+---
 
 When trying to build spark image I stumbled upon this error.
 
@@ -252,11 +234,97 @@ if [ "${TOTAL_JARS}" -eq 0 ]; then
 fi
 ```
 
-Windows SPARK_ROOT path variable holds Windows specific path with '\' delimeter signs and that being substituted causes
-invalid mixture of '\' and '/' signs in path. So I just hard coded my path and it worked out.
+Windows SPARK_ROOT path variable holds Windows specific path with '\\' delimeter signs and that being substituted causes
+invalid mixture of '\\' and '/' signs in path. So I just hard coded my path and it worked out.
 
 ```bash
 local TOTAL_JARS=$(ls E:/software/Spark/spark-3.1.3-3.2/jars/spark-* | wc -l)
 ```
 
 Probably I should start using Linux at least on a virtual machine to avoid such inconveniences.
+
+---
+
+When starting spark-submit being attached to the pod there was an error.
+
+```bash
+PS E:\other\Scala practice\ScalaTraining> kubectl attach -it app-deployment-6fffdccd68-868ck
+If you don't see a command prompt, try pressing enter.
+
+$ spark-submit --jars /application/lib/* --class Main /application/test_4.jar --mode cos --action read --number 5
+22/05/12 21:25:48 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Exception in thread "main" org.apache.spark.SparkException: No main class set in JAR; please specify one with --class.
+        at org.apache.spark.deploy.SparkSubmit.error(SparkSubmit.scala:972)
+        at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:492)
+        at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:898)
+        at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)
+        at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)
+        at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)
+        at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1043)
+        at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1052)
+        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+```
+
+Fixed by adding /application/test_4.jar in --jars argument.
+
+```bash
+spark-submit --class Main --jars /application/lib/*,/application/test_4.jar /application/test_4.jar -m cos -a read -n 5
+```
+
+---
+
+When I try to launch my job.yaml in kubernetes.
+
+```bash
+PS E:\other\Scala practice\ScalaTraining\k8s> kubectl delete -f .\job.yaml; kubectl apply -f .\job.yaml; kubectl get all
+job.batch "reader" deleted
+job.batch/reader created
+NAME                                  READY   STATUS              RESTARTS      AGE
+pod/app-deployment-6fffdccd68-868ck   1/1     Running             2 (17h ago)   17h
+pod/reader-jrnp5                      0/1     ContainerCreating   0             0s
+...
+NAME               COMPLETIONS   DURATION   AGE
+job.batch/reader   0/1           0s         0s
+
+PS E:\other\Scala practice\ScalaTraining\k8s> kubectl logs reader-jrnp5
+Exception in thread "main" java.lang.IllegalArgumentException: basedir must be absolute: ?/.ivy2/local
+        at org.apache.ivy.util.Checks.checkAbsolute(Checks.java:48)
+        at org.apache.ivy.plugins.repository.file.FileRepository.setBaseDir(FileRepository.java:131)
+        at org.apache.ivy.plugins.repository.file.FileRepository.<init>(FileRepository.java:44)
+        at org.apache.spark.deploy.SparkSubmitUtils$.createRepoResolvers(SparkSubmit.scala:1179)
+        at org.apache.spark.deploy.SparkSubmitUtils$.buildIvySettings(SparkSubmit.scala:1281)
+        at org.apache.spark.util.DependencyUtils$.resolveMavenDependencies(DependencyUtils.scala:182)
+        at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:308)
+        at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:898)
+        at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)
+        at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)
+        at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)
+        at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1043)
+        at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1052)
+        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+```
+
+After some stackoverflow https://stackoverflow.com/questions/50861477/basedir-must-be-absolute-ivy2-local
+I appended `--conf spark.jars.ivy=/tmp/.ivy` to my spark-submit and got this
+
+```bash
+PS E:\other\Scala practice\ScalaTraining\k8s> kubectl logs reader-wnslr
+22/05/13 15:01:32 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Exception in thread "main" org.apache.hadoop.security.KerberosAuthException: failure to login: javax.security.auth.login.LoginException: java.lang.NullPointerException: invalid null input: name
+        at com.sun.security.auth.UnixPrincipal.<init>(UnixPrincipal.java:71)
+        at com.sun.security.auth.module.UnixLoginModule.login(UnixLoginModule.java:133)
+        ...
+        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+Caused by: javax.security.auth.login.LoginException: java.lang.NullPointerException: invalid null input: name
+        at com.sun.security.auth.UnixPrincipal.<init>(UnixPrincipal.java:71)
+        ...
+        at org.apache.hadoop.security.UserGroupInformation.doSubjectLogin(UserGroupInformation.java:1975)
+        ... 28 more
+```
+
+Then I used this https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
+Bud it didn't help either.
+And finally this one helped https://stackoverflow.com/questions/62741285/spark-submit-fails-on-kubernetes-eks-with-invalid-null-input-name
+
+---
+
