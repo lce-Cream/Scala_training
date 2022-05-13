@@ -20,13 +20,17 @@ object CLIParser {
     number.setRequired(true)
     number.setArgName("int")
 
-    val help = new Option("h", "help", false, "Show help massage")
+    val help = new Option("h", "help", false, "Show help massage.")
+    help.setRequired(false)
+
+    val verbose = new Option("v", "verbose", false, "Print debug info during execution.")
     help.setRequired(false)
 
     options.addOption(mode)
     options.addOption(action)
     options.addOption(number)
     options.addOption(help)
+    options.addOption(verbose)
 
     /** Parses CLI arguments into mapping.
      *
@@ -42,8 +46,7 @@ object CLIParser {
         val number = args.getOptionValue("number")
 
         Try(
-            args.getOptions.length == 3
-              && mods.contains(mode)
+              mods.contains(mode)
               && actions.contains(action)
               && number.toInt.isInstanceOf[Int]
         ).getOrElse(false)

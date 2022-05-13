@@ -7,7 +7,6 @@ import util.CLIParser
 
 object Main {
     private val config = Config.getConfig
-//    config.foreach(println)
 
     def readDB2(number: Int): Option[DataFrame] = {
         try {
@@ -95,6 +94,8 @@ object Main {
         val mode    = argsMap("mode")
         val action  = argsMap("action")
         val number  = argsMap("number").toInt
+
+        if (argsMap.contains("verbose")) config.foreach(println)
 
         mode match {
             case "db2" =>
