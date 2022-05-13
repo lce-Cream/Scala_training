@@ -20,6 +20,14 @@ class CLITest extends AnyWordSpec{
                     "number" -> "100",
                 )
             )
+            assert(
+                CLIParser.parse(Array("--number","5","-a","write","--mode","local"))
+                  == Map[String, String](
+                    "mode"   -> "local",
+                    "action" -> "write",
+                    "number" -> "5",
+                )
+            )
         }
 
         "throw exception when number of arguments is not equal to 3" in {
