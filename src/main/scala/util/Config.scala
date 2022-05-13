@@ -1,6 +1,7 @@
 package util
 
-import util.{Spark, Environment}
+import scala.collection.immutable.ListMap
+import util.Environment
 
 object Config {
     val DB2Credentials = Map(
@@ -31,11 +32,15 @@ object Config {
     )
 
     def getConfig: Map[String, String] = {
-        DB2Credentials ++
-        COSCredentials ++
-        MySQLCredentials ++
-        LocalCredentials ++
-        Environment.getMap ++
-        Spark.sparkSession.conf.getAll
+        val config =
+            DB2Credentials     ++
+            COSCredentials     ++
+            MySQLCredentials   ++
+            LocalCredentials   ++
+            Environment.getMap ++
+            Spark.sparkSession.conf.getAll
+
+        // sort it all for better look
+        ListMap(config.toSeq.sortBy(_._1):_*)
     }
 }
