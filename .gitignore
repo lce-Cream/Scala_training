@@ -7,6 +7,3 @@ other
 out
 data
 test.sc
-spark-config-real.conf
-spark-config-real.env
-secret-real.yaml

@@ -1,29 +1,82 @@
 ## Workflow  
 
-### Pod deployment  
+### Running a job  
 
-build app's docker image  
-start docker daemon
+Start docker daemon. Build app's docker image.
 
-```shell
-minikube start driver=hyperv
+```bash
+docker build -f ./Dockerfile --cache-from bitnami/spark -t arseni/app .
+```
+
+Start minikube.
+
+```bash
+minikube start driver=hyperv; minikube status
+```
+
+Load this image in minikube cluster.
+
+```bash
 minikube image load arseni/app
+```
 
+Fill secret.yaml with your credentials. Start the secret.
+
+```bash
 kubectl apply -f secret.yaml
-kubectl apply -f deployment.yaml
+```
 
-kubectl get deployments
-kubectl get pods -o wide
+Supply your arguments in job.yaml `args`.
 
-kubectl describe pod myapp-deployment-68876d9b75-dthhw
-kubectl logs myapp-deployment-68876d9b75-dthhw
+```text
+usage: Configure job to run data load and data transform processes
+ -a,--action <str>   Choose to read/write data.
+ -h,--help           Show help massage.
+ -m,--mode <str>     Launch process using db2/cos/local.
+ -n,--number <int>   Amount of records to use.
+ -v,--verbose        Print debug info during execution.
+```
 
-kubectl get secret
-kubectl get all
-kubectl get pod --watch
-kubectl attach -ti pod/app-deployment-6fffdccd68-bcnt6
+```yaml
+args: ["/bin/sh","-c","spark-submit --jars /application/lib/*,/application/* --class Main /application/test_4.jar -m db2 -a read -n 5"]
+```
 
-kubectl delete deployment app-deployment
+Start the job.
+
+```bash
+kubectl apply -f job.yaml
+```
+
+Check the result.
+
+```bash
+kubectl get pods
+
+NAME               READY   STATUS      RESTARTS   AGE
+pod/reader-tmjzd   0/1     Completed   0          19s
+```
+
+```bash
+kubectl logs pod/reader-tmjzd
+
+ 13:09:07.45
+ 13:09:07.46 Welcome to the Bitnami spark container
+ 13:09:07.46 Subscribe to project updates by watching https://github.com/bitnami/bitnami-docker-spark
+ 13:09:07.46 Submit issues and feature requests at https://github.com/bitnami/bitnami-docker-spark/issues
+ 13:09:07.47
+
+22/05/14 13:09:32 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+22/05/14 13:09:41 INFO DB2Connection: Reading table: ARSENI_SALES_DATA
++----------+-------------+----+------+
+|product_id|product_group|year| sales|
++----------+-------------+----+------+
+|         0|            0|2015|787756|
+|         8|            1|2015|586892|
+|         1|            4|2015|574870|
+|         3|            6|2015|627011|
+|        10|            3|2016|602343|
++----------+-------------+----+------+
 ```
 
 ### Spark on Kubernetes
@@ -31,7 +84,7 @@ kubectl delete deployment app-deployment
 Start docker daemon, start minikube.
 
 ```bash
-minikube start
+minikube start --driver=hyperv
 ```
 
 Build Spark image in minikube docker daemon.
@@ -42,23 +95,11 @@ docker-image-tool.sh -m -t arseni build
 
 ## State  
 
-1) Trying to run kubernetes job.
-2) Deploying Spark image on minikube.
+1) Deploying Spark image on minikube.
 
 ## Problems current  
 
 ### 1)
-
-After I had moved spark-submit call from Dockerfile's CMD to job's args or typed spark-submit directly into
-attached deployment, I got a huge pack of various problems. They include missing classes and libraries,
-malfunctioning secrets and right after I dealt with all these now it seems like the pod can't use internet connection.
-DB2 and COS functions can't see their hosts, and `curl google.com` gets nothing. All of that makes me think,
-that `ENTRYPOINT ["/opt/bitnami/scripts/spark/entrypoint.sh"]` layer in bitnami/spark image, which (as I understand)
-took commands from mine Dockerfile's CMD, and `CMD ["/opt/bitnami/scripts/spark/run.sh"]` are really important,
-and I should try to use them manually instead of seemingly endless suffering in constant problems' abyss. 
-
-
-### 2)
 Errors during Spark image build. When I build it in local docker daemon everything is ok, but with
 '-m' flag in docker-image-tool which is supposed to build the image inside minikube, I get this.
 
@@ -325,6 +366,14 @@ Caused by: javax.security.auth.login.LoginException: java.lang.NullPointerExcept
 Then I used this https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
 Bud it didn't help either.
 And finally this one helped https://stackoverflow.com/questions/62741285/spark-submit-fails-on-kubernetes-eks-with-invalid-null-input-name
+
+---
+
+No internet access in minikube's pod. Solved by recreating minikube cluster.
+
+```bash
+minikube stop && minikube delete && minikube start --driver=hyperv --force
+```
 
 ---
 

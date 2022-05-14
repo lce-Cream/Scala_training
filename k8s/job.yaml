@@ -1,18 +1,15 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  creationTimestamp: null
   name: reader
 spec:
   template:
-    metadata:
-      creationTimestamp: null
     spec:
       containers:
         - image: arseni/app:latest
           imagePullPolicy: IfNotPresent
           name: reader
-          args: ["/bin/sh", "-c", "spark-submit -v --jars /application/lib/*,/application/* --class Main /application/test_4.jar -m cos -a read -n 5 -v"]
+          args: ["/bin/sh","-c","spark-submit --jars /application/lib/*,/application/* --class Main /application/test_4.jar -m cos -a read -n 2"]
           env:
             - name: spark_db2_url
               valueFrom:
