@@ -93,101 +93,20 @@ Build Spark image in minikube docker daemon.
 docker-image-tool.sh -m -t arseni build
 ```
 
-## State  
-
-1) Deploying Spark image on minikube.
+## State
+1) Making Spark k8s cluster.
 
 ## Problems current  
 
 ### 1)
-Errors during Spark image build. When I build it in local docker daemon everything is ok, but with
-'-m' flag in docker-image-tool which is supposed to build the image inside minikube, I get this.
+Trying to connect to a spark container in minikube.
+Feels like I don't actually understand how it works. Am I supposed to run spark image in a pod and then
+use spark-submit outside the k8s or do it inside the pod? Maybe I don't even need to build this spark image and
+rather just use my previous one with some tweaks. Anyways this image seems not working.
 
 ```bash
-$ ./docker-image-tool.sh -m -t arseni build
-Sending build context to Docker daemon    259MB
-Step 1/18 : ARG java_image_tag=11-jre-slim
-Step 2/18 : FROM openjdk:${java_image_tag}
-11-jre-slim: Pulling from library/openjdk
-214ca5fb9032: Pulling fs layer
-ebf31789c5c1: Pulling fs layer
-8741521b2ba4: Pulling fs layer
-61e6176efc30: Pulling fs layer
-61e6176efc30: Waiting
-8741521b2ba4: Verifying Checksum
-8741521b2ba4: Download complete
-ebf31789c5c1: Verifying Checksum
-ebf31789c5c1: Download complete
-61e6176efc30: Verifying Checksum
-61e6176efc30: Download complete
-214ca5fb9032: Download complete
-214ca5fb9032: Pull complete
-ebf31789c5c1: Pull complete
-8741521b2ba4: Pull complete
-61e6176efc30: Pull complete
-Digest: sha256:8837dcc4ef68236f534495ca266c0072a0a78fab10b241296c8be47ffe83c06b
-Status: Downloaded newer image for openjdk:11-jre-slim
- ---> fe17e42ebc78
-Step 3/18 : ARG spark_uid=185
- ---> Running in f40d6334b67b
-Removing intermediate container f40d6334b67b
- ---> bc6d60edaf36
-Step 4/18 : RUN set -ex &&     sed -i 's/http:\/\/deb.\(.*\)/https:\/\/deb.\1/g' /etc/apt/sources.list &&     apt-get update &&     ln -s /lib /lib64 &&     apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps &&     mkdir -p /opt/spark &&     mkdir -p /opt/spark/examples &&     mkdir -p /opt/spark/work-dir &&     touch /opt/spark/RELEASE &&     rm /bin/sh &&     ln -sv /bin/bash /bin/sh &&     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su &&     chgrp root /etc/passwd && chmod ug+rw /etc/passwd &&     rm -rf /var/cache/apt/*
- ---> Running in 8d5d624d4164
-+ sed -i s/http:\/\/deb.\(.*\)/https:\/\/deb.\1/g /etc/apt/sources.list
-+ apt-get update
-Err:1 https://deb.debian.org/debian bullseye InRelease
-  Temporary failure resolving 'deb.debian.org'
-Err:2 http://security.debian.org/debian-security bullseye-security InRelease
-  Temporary failure resolving 'security.debian.org'
-Err:3 https://deb.debian.org/debian bullseye-updates InRelease
-  Temporary failure resolving 'deb.debian.org'
-Reading package lists...
-W: Failed to fetch https://deb.debian.org/debian/dists/bullseye/InRelease  Temporary failure resolving 'deb.debian.org'
-W: Failed to fetch http://security.debian.org/debian-security/dists/bullseye-security/InRelease  Temporary failure resolving 'security.debian.org'
-W: Failed to fetch https://deb.debian.org/debian/dists/bullseye-updates/InRelease  Temporary failure resolving 'deb.debian.org'
-W: Some index files failed to download. They have been ignored, or old ones used instead.
-+ ln -s /lib /lib64
-+ apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps
-
-WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
-
-Reading package lists...
-Building dependency tree...
-Reading state information...
-Package krb5-user is not available, but is referred to by another package.
-This may mean that the package is missing, has been obsoleted, or
-is only available from another source
-
-E: Unable to locate package tini
-E: Package 'krb5-user' has no installation candidate
-E: Unable to locate package libnss3
-E: Unable to locate package procps
-The command '/bin/sh -c set -ex &&     sed -i 's/http:\/\/deb.\(.*\)/https:\/\/deb.\1/g' /etc/apt/sources.list &&     apt-get update &&     ln -s /lib /lib64 &&     apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps &&     mkdir -p /opt/spark &&     mkdir -p /opt/spark/examples &&     mkdir -p /opt/spark/work-dir &&     touch /opt/spark/RELEASE &&     rm /bin/sh &&     ln -sv /bin/bash /bin/sh &&     echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su &&     chgrp root /etc/passwd && chmod ug+rw /etc/passwd &&     rm -rf /var/cache/apt/*' returned a non-zero code: 100
-Failed to build Spark JVM Docker image, please refer to Docker build output for details.
-```
-
-Then I tried to load it manually.
-
-```bash
-docker-image-tool -t arseni build
-minikube image load spark:arseni
-kubectl run myspark --image=spark:arseni
-kubectl get pods
-```
-
-```bash
-NAME                              READY   STATUS             RESTARTS      AGE
-myspark                           0/1     CrashLoopBackOff   2 (14s ago)   34s
-```
-
-```bash
-kubectl logs myspark
-```
-
-Which gives the following.
-
-```bash
+PS C:\Users\user\Desktop\Scala_training> kubectl run myspark --image=spark:arseni
+PS C:\Users\user\Desktop\Scala_training> kubectl logs pod/myspark
 ++ id -u
 + myuid=185
 ++ id -g
@@ -204,7 +123,6 @@ Which gives the following.
 + grep SPARK_JAVA_OPT_
 + sort -t_ -k4 -n
 + sed 's/[^=]*=\(.*\)/\1/g'
-Non-spark-on-k8s command provided, proceeding in pass-through mode...
 + readarray -t SPARK_EXECUTOR_JAVA_OPTS
 + '[' -n '' ']'
 + '[' -z ']'
@@ -216,6 +134,7 @@ Non-spark-on-k8s command provided, proceeding in pass-through mode...
 + SPARK_CLASSPATH='/opt/spark/conf::/opt/spark/jars/*'
 + case "$1" in
 + echo 'Non-spark-on-k8s command provided, proceeding in pass-through mode...'
+Non-spark-on-k8s command provided, proceeding in pass-through mode...
 + CMD=("$@")
 + exec /usr/bin/tini -s --
 tini (tini version 0.19.0)
@@ -240,7 +159,6 @@ Environment variables:
   TINI_SUBREAPER: Register as a process subreaper (requires Linux >= 3.4).
   TINI_VERBOSITY: Set the verbosity level (default: 1).
   TINI_KILL_PROCESS_GROUP: Send signals to the child's process group.
-
 ```
 
 ## Problems solved  
