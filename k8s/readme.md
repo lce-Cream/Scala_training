@@ -81,84 +81,63 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 
 ### Spark on Kubernetes
 
-Start docker daemon, start minikube.
+Start docker daemon. Build app's docker image.
 
 ```bash
-minikube start --driver=hyperv
+docker build -f ./Dockerfile --cache-from bitnami/spark -t arseni/app .
 ```
 
-Build Spark image in minikube docker daemon.
+Start minikube.
 
 ```bash
-docker-image-tool.sh -m -t arseni build
+minikube start driver=hyperv; minikube status
+```
+
+Load this image in minikube cluster.
+
+```bash
+minikube image load arseni/app
+```
+
+Fill secret.yaml with your credentials. Start the secret.
+
+```bash
+kubectl apply -f secret.yaml
+```
+
+Start a pod.
+
+```bash
+kubectl apply -f pod.yaml
+```
+
+Attach to it.
+
+```bash
+winpty kubectl attach -it pods/myspark
 ```
 
 ## State
-1) Making Spark k8s cluster.
+1) Launching spark-submit with k8s master.
 
 ## Problems current  
 
 ### 1)
-Trying to connect to a spark container in minikube.
-Feels like I don't actually understand how it works. Am I supposed to run spark image in a pod and then
-use spark-submit outside the k8s or do it inside the pod? Maybe I don't even need to build this spark image and
-rather just use my previous one with some tweaks. Anyways this image seems not working.
+Some kind of permissions problem when launching spark-submit.
 
 ```bash
-PS C:\Users\user\Desktop\Scala_training> kubectl run myspark --image=spark:arseni
-PS C:\Users\user\Desktop\Scala_training> kubectl logs pod/myspark
-++ id -u
-+ myuid=185
-++ id -g
-+ mygid=0
-+ set +e
-++ getent passwd 185
-+ uidentry=
-+ set -e
-+ '[' -z '' ']'
-+ '[' -w /etc/passwd ']'
-+ echo '185:x:185:0:anonymous uid:/opt/spark:/bin/false'
-+ SPARK_CLASSPATH=':/opt/spark/jars/*'
-+ env
-+ grep SPARK_JAVA_OPT_
-+ sort -t_ -k4 -n
-+ sed 's/[^=]*=\(.*\)/\1/g'
-+ readarray -t SPARK_EXECUTOR_JAVA_OPTS
-+ '[' -n '' ']'
-+ '[' -z ']'
-+ '[' -z ']'
-+ '[' -n '' ']'
-+ '[' -z ']'
-+ '[' -z ']'
-+ '[' -z x ']'
-+ SPARK_CLASSPATH='/opt/spark/conf::/opt/spark/jars/*'
-+ case "$1" in
-+ echo 'Non-spark-on-k8s command provided, proceeding in pass-through mode...'
-Non-spark-on-k8s command provided, proceeding in pass-through mode...
-+ CMD=("$@")
-+ exec /usr/bin/tini -s --
-tini (tini version 0.19.0)
-Usage: tini [OPTIONS] PROGRAM -- [ARGS] | --version
-
-Execute a program under the supervision of a valid init process (tini)
-
-Command line options:
-
-  --version: Show version and exit.
-  -h: Show this help message and exit.
-  -s: Register as a process subreaper (requires Linux >= 3.4).
-  -p SIGNAL: Trigger SIGNAL when parent dies, e.g. "-p SIGKILL".
-  -v: Generate more verbose output. Repeat up to 3 times.
-  -w: Print a warning when processes are getting reaped.
-  -g: Send signals to the child's process group.
-  -e EXIT_CODE: Remap EXIT_CODE (from 0 to 255) to 0.
-  -l: Show license and exit.
-
-Environment variables:
-
-  TINI_SUBREAPER: Register as a process subreaper (requires Linux >= 3.4).
-  TINI_VERBOSITY: Set the verbosity level (default: 1).
-  TINI_KILL_PROCESS_GROUP: Send signals to the child's process group.
+ERROR Client: Please check "kubectl auth can-i create pod" first. It should be yes.
+Exception in thread "main" io.fabric8.kubernetes.client.KubernetesClientException: Operation: [create]  for kind: [Pod]  with name: [nu
+ll]  in namespace: [default]  failed.
+        at io.fabric8.kubernetes.client.KubernetesClientException.launderThrowable(KubernetesClientException.java:64)
+        at io.fabric8.kubernetes.client.KubernetesClientException.launderThrowable(KubernetesClientException.java:72)
+        at io.fabric8.kubernetes.client.dsl.base.BaseOperation.create(BaseOperation.java:380)
+        at io.fabric8.kubernetes.client.dsl.base.BaseOperation.create(BaseOperation.java:86)
+        at org.apache.spark.deploy.k8s.submit.Client.run(KubernetesClientApplication.scala:141)
+        at org.apache.spark.deploy.k8s.submit.KubernetesClientApplication.$anonfun$run$4(KubernetesClientApplication.scala:220)
+        at org.apache.spark.deploy.k8s.submit.KubernetesClientApplication.$anonfun$run$4$adapted(KubernetesClientApplication.scala:214)
+        at org.apache.spark.util.Utils$.tryWithResource(Utils.scala:2713)
+        ...
 ```
 
 ## Problems solved  
