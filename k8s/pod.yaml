@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: myspark
+  name: myspark3
 spec:
   containers:
-    - name: myspark
-      image: bitnami/spark
+    - name: myspark3
+      image: spark:test
       imagePullPolicy: IfNotPresent
       tty: true
       stdin: true
