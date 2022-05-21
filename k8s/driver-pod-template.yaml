@@ -1,15 +1,14 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: myspark3
+  name: myspark
 spec:
   containers:
-    - name: myspark3
-      image: spark:test
+    - name: myspark
+      image: spark:k8s
       imagePullPolicy: IfNotPresent
       tty: true
       stdin: true
-      args: ["/bin/sh"]
       ports:
         - containerPort: 80
       env:

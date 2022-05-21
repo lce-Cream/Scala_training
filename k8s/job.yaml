@@ -6,10 +6,10 @@ spec:
   template:
     spec:
       containers:
-        - image: arseni/app:latest
+        - image: spark:k8s
           imagePullPolicy: IfNotPresent
           name: reader
-          args: ["/bin/sh","-c","spark-submit --jars /application/lib/*,/application/* --class Main /application/test_4.jar -m cos -a read -n 2"]
+          args: ["/bin/sh","-c","spark-submit --jars /app/*, --class Main app.jar -m cos -a read -n 5"]
           env:
             - name: spark_db2_url
               valueFrom:
