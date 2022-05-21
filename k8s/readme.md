@@ -1,24 +1,43 @@
 ## Workflow  
 
+Start docker daemon. Start minikube.
+```bash
+minikube start; minikube status
+```
+
+Build Spark image using build.sh script provided in this directory. The script uses your local Spark distribution
+to build lightweight Spark image, it's 3 times smaller than bitnami/spark image (600MB vs 1700MB) and builds & works
+slightly faster.
+Note: be sure you are in k8s directory.
+```bash
+./build.sh -m -t k8s
+```
+
+Help message.
+
+```text
+Usage: ./build.sh [options]
+Builds and loads the built-in Spark Docker image in minikube.
+
+Options:
+  -m          Use minikube's Docker daemon.
+  -t          Image tag.
+  -h          Print this help message.
+
+Using minikube when building images will do so directly into minikube's Docker daemon.
+There is no need to push the images into minikube in that case, they'll be automatically
+available when running applications inside the minikube cluster.
+
+Examples:
+  - Build image in minikube with tag "testing"
+    ./build.sh -m -t testing
+
+  - Build docker image
+    ./build.sh -t testing
+```
+
+
 ### Running a job  
-
-Start docker daemon. Build app's docker image.
-
-```bash
-docker build -f ./Dockerfile --cache-from bitnami/spark -t arseni/app .
-```
-
-Start minikube.
-
-```bash
-minikube start driver=hyperv; minikube status
-```
-
-Load this image in minikube cluster.
-
-```bash
-minikube image load arseni/app
-```
 
 Fill secret.yaml with your credentials. Start the secret.
 
@@ -27,7 +46,6 @@ kubectl apply -f secret.yaml
 ```
 
 Supply your arguments in job.yaml `args`.
-
 ```text
 usage: Configure job to run data load and data transform processes
  -a,--action <str>   Choose to read/write data.
@@ -37,205 +55,92 @@ usage: Configure job to run data load and data transform processes
  -v,--verbose        Print debug info during execution.
 ```
 
+Example that reads 5 records from COS.
 ```yaml
-args: ["/bin/sh","-c","spark-submit --jars /application/lib/*,/application/* --class Main /application/test_4.jar -m db2 -a read -n 5"]
+args: ["/bin/sh","-c","spark-submit --jars /app/*, --class Main app.jar -m db2 -a read -n 5"]
 ```
 
 Start the job.
-
 ```bash
 kubectl apply -f job.yaml
 ```
 
 Check the result.
-
 ```bash
 kubectl get pods
-
+```
+```text
 NAME               READY   STATUS      RESTARTS   AGE
 pod/reader-tmjzd   0/1     Completed   0          19s
 ```
-
 ```bash
 kubectl logs pod/reader-tmjzd
-
- 13:09:07.45
- 13:09:07.46 Welcome to the Bitnami spark container
- 13:09:07.46 Subscribe to project updates by watching https://github.com/bitnami/bitnami-docker-spark
- 13:09:07.46 Submit issues and feature requests at https://github.com/bitnami/bitnami-docker-spark/issues
- 13:09:07.47
-
-22/05/14 13:09:32 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
-22/05/14 13:09:41 INFO DB2Connection: Reading table: ARSENI_SALES_DATA
-+----------+-------------+----+------+
-|product_id|product_group|year| sales|
-+----------+-------------+----+------+
-|         0|            0|2015|787756|
-|         8|            1|2015|586892|
-|         1|            4|2015|574870|
-|         3|            6|2015|627011|
-|        10|            3|2016|602343|
-+----------+-------------+----+------+
 ```
 
-### Spark on Kubernetes
+The result is in the ./logs/job.logs file.
 
-Start docker daemon. Build app's docker image.
 
-*sharpening*
+### Spark in cluster mode
+
+Get your minikube ip address.
+```shell
+$K8S_SERVER=kubectl.exe config view --output=jsonpath='{.clusters[].cluster.server}'
+```
+
+Launch spark-submit.
+```shell
+spark-submit.cmd `
+--master k8s://$K8S_SERVER `
+--deploy-mode cluster `
+--class Main `
+--conf spark.kubernetes.container.image=spark:k8s `
+--conf spark.executor.instances=2 `
+--conf spark.kubernetes.driver.pod.name=my-spark-driver `
+--conf spark.kubernetes.driver.podTemplateFile=./driver-pod-template.yaml `
+--conf spark.driver.extraClassPath=/app/* `
+local:///app/app.jar -m db2 -a read -n 5
+```
+
+That's all. All outputs (submit.logs, driver.logs) are provided in ./logs directory.
 
 
 ## State
-Launching spark-submit with k8s master.
-I started to move away from my initially right way I had chosen due to misleading errors and poor documentation.
-But now I'm back on the trail. Everything is working now and it's only left to pass secret to my cluster.
+Everything is done.
 
 
-## Problems current  
+## Questions
 
-No troubles yet, only plans.
+Why does image built with standard Spark Dockerfile always print this in logs? Is it kinda verbose log info, then why
+in such a weird format with '+' signs?
 
-
-## Problems solved  
-  
-All previous problems with CLI malfunctioning were solved by adding tty and stdin keys in deployment.yaml.
-
-```yaml
-containers:
-  - name: app-container
-    image: arseni/app
-    tty: true
-    stdin: true
+```text
+PS C:\Users\user> kubectl.exe logs my-spark-driver
+++ id -u
++ myuid=185
+++ id -g
++ mygid=0
++ set +e
+++ getent passwd 185
++ uidentry=
++ set -e
++ '[' -z '' ']'
++ '[' -w /etc/passwd ']'
++ echo '185:x:185:0:anonymous uid:/opt/spark:/bin/false'
++ SPARK_CLASSPATH=':/opt/spark/jars/*'
++ env
++ grep SPARK_JAVA_OPT_
++ sort -t_ -k4 -n
++ sed 's/[^=]*=\(.*\)/\1/g'
++ readarray -t SPARK_EXECUTOR_JAVA_OPTS
++ '[' -n '' ']'
++ '[' -z ']'
++ '[' -z ']'
++ '[' -n '' ']'
++ '[' -z ']'
++ '[' -z x ']'
++ SPARK_CLASSPATH='/opt/spark/conf::/opt/spark/jars/*'
++ case "$1" in
++ shift 1
++ CMD=("$SPARK_HOME/bin/spark-submit" --conf "spark.driver.bindAddress=$SPARK_DRIVER_BIND_ADDRESS" --deploy-mode client "$@")
++ exec /usr/bin/tini -s -- /opt/spark/bin/spark-submit --conf spark.driver.bindAddress=172.17.0.5 --deploy-mode client --properties-file /opt/spark/conf/spark.properties --class Main local:///app/app.jar -m db2 -a read -n 5
 ```
-
----
-
-When trying to build spark image I stumbled upon this error.
-
-```bash
-$ ./docker-image-tool.sh -t arseni build
-ls: cannot access 'E:\software\Spark\spark-3.1.3-3.2/jars/spark-*': No such file or directory
-Cannot find Spark JARs. This script assumes that Apache Spark has first been built locally or this is a runnable distribution.
-
-```
-
-Then I looked up in this docker-image-tool.sh script and found next lines.
-```bash
-local TOTAL_JARS=$(ls $SPARK_ROOT/jars/spark-* | wc -l)
-TOTAL_JARS=$(( $TOTAL_JARS ))
-if [ "${TOTAL_JARS}" -eq 0 ]; then
-  error "Cannot find Spark JARs. This script assumes that Apache Spark has first been built locally or this is a runnable distribution."
-fi
-```
-
-Windows SPARK_ROOT path variable holds Windows specific path with '\\' delimeter signs and that being substituted causes
-invalid mixture of '\\' and '/' signs in path. So I just hard coded my path and it worked out.
-
-```bash
-local TOTAL_JARS=$(ls E:/software/Spark/spark-3.1.3-3.2/jars/spark-* | wc -l)
-```
-
-Probably I should start using Linux at least on a virtual machine to avoid such inconveniences.
-
----
-
-When starting spark-submit being attached to the pod there was an error.
-
-```bash
-PS E:\other\Scala practice\ScalaTraining> kubectl attach -it app-deployment-6fffdccd68-868ck
-If you don't see a command prompt, try pressing enter.
-
-$ spark-submit --jars /application/lib/* --class Main /application/test_4.jar --mode cos --action read --number 5
-22/05/12 21:25:48 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-Exception in thread "main" org.apache.spark.SparkException: No main class set in JAR; please specify one with --class.
-        at org.apache.spark.deploy.SparkSubmit.error(SparkSubmit.scala:972)
-        at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:492)
-        at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:898)
-        at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)
-        at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)
-        at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)
-        at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1043)
-        at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1052)
-        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
-```
-
-Fixed by adding /application/test_4.jar in --jars argument.
-
-```bash
-spark-submit --class Main --jars /application/lib/*,/application/test_4.jar /application/test_4.jar -m cos -a read -n 5
-```
-
----
-
-When I try to launch my job.yaml in kubernetes.
-
-```bash
-PS E:\other\Scala practice\ScalaTraining\k8s> kubectl delete -f .\job.yaml; kubectl apply -f .\job.yaml; kubectl get all
-job.batch "reader" deleted
-job.batch/reader created
-NAME                                  READY   STATUS              RESTARTS      AGE
-pod/app-deployment-6fffdccd68-868ck   1/1     Running             2 (17h ago)   17h
-pod/reader-jrnp5                      0/1     ContainerCreating   0             0s
-...
-NAME               COMPLETIONS   DURATION   AGE
-job.batch/reader   0/1           0s         0s
-
-PS E:\other\Scala practice\ScalaTraining\k8s> kubectl logs reader-jrnp5
-Exception in thread "main" java.lang.IllegalArgumentException: basedir must be absolute: ?/.ivy2/local
-        at org.apache.ivy.util.Checks.checkAbsolute(Checks.java:48)
-        at org.apache.ivy.plugins.repository.file.FileRepository.setBaseDir(FileRepository.java:131)
-        at org.apache.ivy.plugins.repository.file.FileRepository.<init>(FileRepository.java:44)
-        at org.apache.spark.deploy.SparkSubmitUtils$.createRepoResolvers(SparkSubmit.scala:1179)
-        at org.apache.spark.deploy.SparkSubmitUtils$.buildIvySettings(SparkSubmit.scala:1281)
-        at org.apache.spark.util.DependencyUtils$.resolveMavenDependencies(DependencyUtils.scala:182)
-        at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:308)
-        at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:898)
-        at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:180)
-        at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:203)
-        at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:90)
-        at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1043)
-        at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1052)
-        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
-```
-
-After some stackoverflow https://stackoverflow.com/questions/50861477/basedir-must-be-absolute-ivy2-local
-I appended `--conf spark.jars.ivy=/tmp/.ivy` to my spark-submit and got this
-
-```bash
-PS E:\other\Scala practice\ScalaTraining\k8s> kubectl logs reader-wnslr
-22/05/13 15:01:32 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-Exception in thread "main" org.apache.hadoop.security.KerberosAuthException: failure to login: javax.security.auth.login.LoginException: java.lang.NullPointerException: invalid null input: name
-        at com.sun.security.auth.UnixPrincipal.<init>(UnixPrincipal.java:71)
-        at com.sun.security.auth.module.UnixLoginModule.login(UnixLoginModule.java:133)
-        ...
-        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
-Caused by: javax.security.auth.login.LoginException: java.lang.NullPointerException: invalid null input: name
-        at com.sun.security.auth.UnixPrincipal.<init>(UnixPrincipal.java:71)
-        ...
-        at org.apache.hadoop.security.UserGroupInformation.doSubjectLogin(UserGroupInformation.java:1975)
-        ... 28 more
-```
-
-Then I used this https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
-Bud it didn't help either.
-And finally this one helped https://stackoverflow.com/questions/62741285/spark-submit-fails-on-kubernetes-eks-with-invalid-null-input-name
-
----
-
-No internet access in minikube's pod. Solved by recreating minikube cluster.
-
-```bash
-minikube stop && minikube delete && minikube start --driver=hyperv --force
-```
-
----
-
-Spark driver could not connect to its pods. I discovered that usual bitnami/spark package doesn't have "tini" tool which I found
-in shipped with Spark Dockerfile and it makes it unsuitable for cluster usage. That means you should use standard `docker-image-tool.sh`
-to build viable image for cluster mode usage. From this point I cloud try to patch my own image based on bitnami/spark to work properly.
-But I dicided to slightly modify standard Spark Dockerfile and use `docker-image-tool.sh` on it. And finally everything seems to work like
-expected.
-
----
-
