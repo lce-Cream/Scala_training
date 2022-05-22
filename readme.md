@@ -1,10 +1,11 @@
-## Description
+# Description
 This application provides a few classes for work with IBM DB2 cloud storage, IBM COS (cloud object storage), local storage,
 MySQL database and data generation.
 Here you can read data from using various connection types, transform data in dataframes with aggregation,
 save dataframes to your connections and run it all in spark-submit.
 
-## Requirements
+
+# Requirements
 It's strongly recommended using these versions for stable work.
 | Name | Version |
 | ------ | ------ |
@@ -16,9 +17,11 @@ It's strongly recommended using these versions for stable work.
 | Docker| 4.7.1   |
 | OS    | Windows |
 
-## Setup
-### Installation
+
+# Setup
+## Installation
 Clone this repo.
+
 ```shell
 $ git clone https://github.com/lce-Cream/Scala_training.git
 ```
@@ -30,133 +33,120 @@ $ sbt reload
 
 Follow further instructions.
 
-### Configuration
-Configuration can be set using environment variables, and it looks like this. Every value except the ones under #spark is compulsory.
-```text
-#spark
-# spark.driver.memory=1g
-spark.master=local[1]
-
-#db2
-spark.db2.url=jdbc:db2://qwerty123.databases.appdomain.cloud:30699/bludb:sslConnection=true;
-spark.db2.user=qwerty123
-spark.db2.password=qwerty123
-spark.db2.table=ARSENI_SALES_DATA
-spark.db2.driver=com.ibm.db2.jcc.DB2Driver
-
-#cos
-spark.cos.access.key=qwerty123
-spark.cos.secret.key=qwerty123
-spark.cos.endpoint=s3.fra.eu.cloud-object-storage
-spark.cos.bucket=iba-ats-training-d3bf1ce5
-spark.cos.service=arseni
-
-#mysql
-spark.mysql.url=jdbc:mysql://localhost:3306/sample_database
-spark.mysql.user=root
-spark.mysql.password=root
-spark.mysql.table=data
-
-#local
-spark.local.path=./data
-```
+## Configuration
+Configuration files templates are in ./src/main/resources.
+Configuration can be set using environment variables or by passing conf file to spark-submit
+with --properties-file option. Every value except the ones under #spark is compulsory.
 
 However, there is default config in project's DefaultConfig.scala file in case you want to keep config file shorter.
 Every value in this config is overloaded by config file above.
 
-## Run
-There are three ways to run the application.
-### SBT
-In project run.
-```shell
-$ sbt run
-```
 
-### Spark-submit
-Or spark-submit could be of assistance. But before that application needs to be packed in one jar file.
-It can be done by IDE's artifact functionality or by using sbt package command.
-```shell
-$ sbt package
-```
-
-You can specify all spark-submit parameters directly like this.
-```shell
-spark-submit.cmd \
---class Main \
---master local[*] \
---conf spark.db2.url=jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true; \
---conf spark.db2.user=rsg \
---conf spark.db2.password=oOWz \
---conf spark.cos.access.key=b8fced6daf \
---conf spark.cos.secret.key=9d7d8b39262aac \
---conf spark.cos.endpoint=s3.fra.eu.cloud-object-storage \
---conf spark.mysql.url=jdbc:mysql://localhost:3306/sample_database \
---conf spark.mysql.user=root \
---conf spark.mysql.password=root \
---conf spark.mysql.table=data \
---conf spark.local.path=./data \
-./Application.jar
-```
-
-Or do it shorter by using spark-config.conf file described in configuration step. Do not forget to pack source code in jar.
-```text
-spark-submit.cmd \
---properties-file ./spark-config.conf \
---class Main ./Application.jar
-```
-
-### Docker
-Build docker image. Make necessary changes to a default dockerfile.
-```dockerfile
-FROM bitnami/spark:latest
-# jar dependencies
-COPY ./lib/* /application/lib/
-# application source packed in jar
-COPY ./out/artifacts/test_4_jar/test_4.jar /application/
-# command to run spark submit job
-CMD ["spark-submit",\
-     "--jars", "/application/lib/*",\
-     "--class", "Main",\
-     "/application/test_4.jar"]
-```
-
-Build an image.
-```bash
-docker build -f ./Dockerfile --cache-from bitnami/spark:latest -t myapp:test_image .
-```
-Run container.
-```bash
-winpty docker run -it --env-file ./src/main/scala/spark-config.env --name myapp_test_env myapp:test_container
-```
-Winpty here is for Windows compatibility.
-
-## Usage
+# Usage
 After config setup you are ready to go. Here's help message to get started.
 ```text
-Choose mode to run data load and data transform processes.
-
-Mods:
-  db2      Launch process using IBM DB2.
-  cos      Launch process using IBM COS.
-  mysql    Launch process using MySQL.
-  local    Launch process using local filesystem.
-  exit     Exit this REPL.
-
-Actions:
-  read    Read data.
-  write   Write data.
-
-Examples:
-  db2 read 10  // show 10 records from db2 storage.
-  cos write 20 // write 20 records to cos storage.
+usage: Configure job to run data load and data transform processes
+ -a,--action <str>   Choose to read/write data.
+ -h,--help           Show help massage.
+ -m,--mode <str>     Launch process using db2/cos/local.
+ -n,--number <int>   Amount of records to use.
+ -v,--verbose        Print debug info during execution.
 ```
 
-## Results
-Every connection type code described above gives roughly the same result.
-Firstly month sales DataFrame is generated,
-after that it transforms by calculating annual sales,
-then it gets written to specified connection,
-and finally it gets read from that connection.
+Example set of arguments that reads 5 records from DB2.
+```text
+-m db2 -a read -n 5
+```
+
+
+# Run
+There are three ways to run the application.
+
+---
+
+Note: Be aware that Windows is a bloated mess and commands that work in cmd may not work in powershell and vise versa.
+Also, you can't use bash emulator like git-bash to run spark-submit on Windows because of incompatibility,
+so you must type "spark-submit.cmd".
+
+---
+
+TL;DR
+```bash
+spark-submit.cmd `
+--jars .\jars\*, `
+--properties-file .\spark-config.conf `
+--class Main .\jars\app.jar -m db2 -a read -n 5
+```
+
+
+## SBT
+In project run the following command, change it according to usage section. Do not forget to set your credentials in
+environment variables or place them in utils.Config.scala file.
+```shell
+sbt "run -m db2 -a read -n 5 -v"
+```
+
+
+## Spark-submit
+Spark-submit could be of assistance. You can use already compiled jars in ./jars directory or do it yourself.
+Jars can be made by IDE's artifact functionality or by using sbt package command.
+```shell
+sbt package
+```
+
+You can specify all spark-submit parameters directly like this. Here app.jar implies to be "fat jar" and you do not
+need to specify --jars in spark-submit.
+```shell
+spark-submit.cmd `
+--class Main `
+--conf spark.db2.url=jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true; `
+--conf spark.db2.user=rsg `
+--conf spark.db2.password=oOWz `
+--conf spark.cos.access.key=b8fced6daf `
+--conf spark.cos.secret.key=9d7d8b39262aac `
+--conf spark.cos.endpoint=s3.fra.eu.cloud-object-storage `
+--conf spark.mysql.url=jdbc:mysql://localhost:3306/sample_database `
+--conf spark.mysql.user=root `
+--conf spark.mysql.password=root `
+--conf spark.mysql.table=data `
+--conf spark.local.path=./data `
+./app.jar -m db2 -a read -n 5
+```
+
+Or do it shorter by using spark-config.conf file described in configuration step.
+```shell
+spark-submit.cmd `
+--properties-file ./spark-config.conf `
+--class Main ./app.jar -m db2 -a read -n 5
+```
+
+But the easies way is to use shipped jars.
+```bash
+spark-submit.cmd `
+--jars .\jars\*, `
+--properties-file .\spark-config.conf `
+--class Main .\jars\app.jar -m db2 -a read -n 5
+```
+
+
+## Docker
+
+Build an image following ./k8s/build.sh instructions.
+```bash
+./build.sh -t k8s
+```
+
+Run container.
+```bash
+winpty docker run -it --env-file ./spark-config.env --name myapp spark:k8s
+```
+
+Winpty here is for Windows compatibility.
+
+
+# Results
+Firstly month sales DataFrame is generated, after that it transforms by calculating annual sales,
+then it gets written to specified connection, and finally it gets read from that connection.
 
 Initial sales DataFrame example.
 ```text
@@ -199,3 +189,34 @@ Annual sales DataFrame example.
 |         7|            0|2018|572053|
 +----------+-------------+----+------+
 ```
+
+# Known issues
+Launch problems.  
+For completely unknown reason using sbt run or IntelliJ run button, app can't read data anymore, but when
+using jars or image in minikube everything is perfectly fine.
+```text
+22/05/22 18:40:48 INFO DB2Connection: Reading table: ARSENI_SALES_TABLE
+DB2 SQL Error: SQLCODE=-204, SQLSTATE=42704, SQLERRMC=DJC70779.ARSENI_SALES_TABLE, DRIVER=4.31.10
+JOB ABORTED
+```
+```text
+22/05/22 20:15:37 INFO ObjectStoreVisitor: Stocator registered as cos for cos://iba-ats-training-d3bf1ce5.arseni/arseni/sales.csv
+22/05/22 20:15:37 INFO COSAPIClient: Init :  cos://iba-ats-training-d3bf1ce5.arseni/arseni/sales.csv
+Unable to execute HTTP request: s3.fra.eu.cloud-object-storage
+JOB ABORTED
+```
+
+---
+
+Commands confusion.  
+I wanted to use powershell only but this idea ended up in a mixture of
+cmd, powershell and bash, each of them with its use cases. Some commands in examples work in cmd some in powershell,
+and some neither. I need to test everything and develop kinda universal style. So when facing misbehaviour try to
+write this command in one line without any break characters in cmd and powershell.
+
+---
+
+Unstable image.  
+Image built by `build.sh` when running on host machine without minikube immediately exits. This is due to absence of
+"CMD /bin/sh -c" layer. I need to add this layer in build.sh when flag "-m" isn't set or test image performance in
+minikube with this layer included.

@@ -9,7 +9,7 @@ spec:
         - image: spark:k8s
           imagePullPolicy: IfNotPresent
           name: reader
-          args: ["/bin/sh","-c","spark-submit --jars /app/*, --class Main app.jar -m cos -a read -n 5"]
+          args: ["/bin/sh","-c","spark-submit --jars /app/*, --class Main app.jar -m db2 -a read -n 10"]
           env:
             - name: spark_db2_url
               valueFrom:

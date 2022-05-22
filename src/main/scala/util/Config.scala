@@ -1,10 +1,9 @@
 package util
 
 import scala.collection.immutable.ListMap
-import util.Environment
 
 object Config {
-    val DB2Credentials = Map(
+    val DB2Credentials: Map[String, String] = Map(
         "spark.db2.url"      -> "jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true;",
         "spark.db2.user"     -> "qwerty",
         "spark.db2.password" -> "qwerty",
@@ -12,7 +11,7 @@ object Config {
         "spark.db2.driver"   -> "com.ibm.db2.jcc.DB2Driver",
     )
 
-    val COSCredentials = Map(
+    val COSCredentials: Map[String, String] = Map(
         "spark.cos.access.key"     -> "qwerty",
         "spark.cos.secret.key"     -> "qwerty",
         "spark.cos.endpoint"       -> "s3.fra.eu.cloud-object-storage",
@@ -20,14 +19,14 @@ object Config {
         "spark.cos.service"        -> "arseni",
     )
 
-    val MySQLCredentials = Map(
+    val MySQLCredentials: Map[String, String] = Map(
         "spark.mysql.url"      -> "jdbc:mysql://localhost:3306/sample_database",
         "spark.mysql.user"     -> "root",
         "spark.mysql.password" -> "root",
         "spark.mysql.table"    -> "data",
     )
 
-    val LocalCredentials = Map(
+    val LocalCredentials: Map[String, String] = Map(
         "spark.local.path" -> "./data",
     )
 

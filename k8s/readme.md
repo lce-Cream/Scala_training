@@ -1,12 +1,11 @@
-## Workflow  
-
+# Workflow
 Start docker daemon. Start minikube.
 ```bash
 minikube start; minikube status
 ```
 
 Build Spark image using build.sh script provided in this directory. The script uses your local Spark distribution
-to build lightweight Spark image, it's 3 times smaller than bitnami/spark image (600MB vs 1700MB) and builds & works
+to build lightweight Spark image, it's 3 times smaller than bitnami/spark image (561MB vs 1700MB) and builds & works
 slightly faster.
 Note: be sure you are in k8s directory.
 ```bash
@@ -14,7 +13,6 @@ Note: be sure you are in k8s directory.
 ```
 
 Help message.
-
 ```text
 Usage: ./build.sh [options]
 Builds and loads the built-in Spark Docker image in minikube.
@@ -36,15 +34,13 @@ Examples:
     ./build.sh -t testing
 ```
 
-
-### Running a job  
-
 Fill secret.yaml with your credentials. Start the secret.
-
 ```bash
 kubectl apply -f secret.yaml
 ```
 
+
+## Running a job
 Supply your arguments in job.yaml `args`.
 ```text
 usage: Configure job to run data load and data transform processes
@@ -57,7 +53,7 @@ usage: Configure job to run data load and data transform processes
 
 Example that reads 5 records from COS.
 ```yaml
-args: ["/bin/sh","-c","spark-submit --jars /app/*, --class Main app.jar -m db2 -a read -n 5"]
+args: ["/bin/sh","-c","spark-submit --jars /app/*, --class Main app.jar -m cos -a read -n 5"]
 ```
 
 Start the job.
@@ -80,8 +76,7 @@ kubectl logs pod/reader-tmjzd
 The result is in the ./logs/job.logs file.
 
 
-### Spark in cluster mode
-
+## Spark in cluster mode
 Get your minikube ip address.
 ```shell
 $K8S_SERVER=kubectl.exe config view --output=jsonpath='{.clusters[].cluster.server}'
@@ -104,15 +99,9 @@ local:///app/app.jar -m db2 -a read -n 5
 That's all. All outputs (submit.logs, driver.logs) are provided in ./logs directory.
 
 
-## State
-Everything is done.
-
-
-## Questions
-
+# Questions
 Why does image built with standard Spark Dockerfile always print this in logs? Is it kinda verbose log info, then why
 in such a weird format with '+' signs?
-
 ```text
 PS C:\Users\user> kubectl.exe logs my-spark-driver
 ++ id -u
