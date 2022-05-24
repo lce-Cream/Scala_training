@@ -87,7 +87,7 @@ object DataFrameGenerator {
     /** Generates small sample DataFrame for test purposes.
      *  @return DataFrame.
      */
-    def test_generate(): DataFrame={
+    def testGenerate(): DataFrame={
         val someData = Seq(
             Row(1, 1, 2015, 10),
             Row(2, 3, 2016, 20),
