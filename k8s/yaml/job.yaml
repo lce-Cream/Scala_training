@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       containers:
-        - image: spark:k8s
+        - image: arseni/spark-app
           imagePullPolicy: IfNotPresent
           name: reader
           args: ["/bin/sh","-c","spark-submit --jars /app/*, --class Main app.jar -m db2 -a read -n 10"]

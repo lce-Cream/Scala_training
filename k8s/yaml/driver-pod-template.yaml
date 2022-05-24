@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: myspark
-      image: spark:k8s
+      image: arseni/spark-app
       imagePullPolicy: IfNotPresent
       tty: true
       stdin: true

@@ -1,8 +1,8 @@
 # Description
-This application provides a few classes for work with IBM DB2 cloud storage, IBM COS (cloud object storage), local storage,
-MySQL database and data generation.
+This application provides a few classes for work with IBM DB2 cloud storage, IBM COS, local storage,
+MySQL and data generation.
 Here you can read data from using various connection types, transform data in dataframes with aggregation,
-save dataframes to your connections and run it all in spark-submit.
+save dataframes to your connections and run it all in spark-submit, docker or kubernetes.
 
 
 # Requirements
@@ -70,20 +70,23 @@ so you must type "spark-submit.cmd".
 
 ---
 
-TL;DR
-```bash
-spark-submit.cmd `
---jars .\jars\*, `
---properties-file .\spark-config.conf `
---class Main .\jars\app.jar -m db2 -a read -n 5
-```
-
-
 ## SBT
 In project run the following command, change it according to usage section. Do not forget to set your credentials in
 environment variables or place them in utils.Config.scala file.
 ```shell
-sbt "run -m db2 -a read -n 5 -v"
+sbt "run -m db2 -a read -n 5"
+```
+
+
+## Docker
+Build docker image.
+```bash
+docker build -t arseni/spark-app .
+```
+
+Run a container with your credentials specified in env file.
+```bash
+docker run -it --env-file .\spark-config.env arseni/spark-app spark-submit --class Main --jars /app/*, app.jar -m db2 -a read -n 5
 ```
 
 
@@ -120,28 +123,13 @@ spark-submit.cmd `
 --class Main ./app.jar -m db2 -a read -n 5
 ```
 
-But the easies way is to use shipped jars.
+But it's easier to use shipped jars.
 ```bash
 spark-submit.cmd `
 --jars .\jars\*, `
 --properties-file .\spark-config.conf `
 --class Main .\jars\app.jar -m db2 -a read -n 5
 ```
-
-
-## Docker
-
-Build an image following ./k8s/build.sh instructions.
-```bash
-./build.sh -t k8s
-```
-
-Run container.
-```bash
-winpty docker run -it --env-file ./spark-config.env --name myapp spark:k8s
-```
-
-Winpty here is for Windows compatibility.
 
 
 # Results
@@ -192,7 +180,8 @@ Annual sales DataFrame example.
 
 # Known issues
 Launch problems.  
-For completely unknown reason using sbt run or IntelliJ run button, app can't read data anymore, but when
+I suspect jdk and jre versions are responsible for such unstable behaviour, yet another reason to use containers.  
+Using sbt run or IntelliJ run button, app successfully reads data not every run, but when
 using jars or image in minikube everything is perfectly fine.
 ```text
 22/05/22 18:40:48 INFO DB2Connection: Reading table: ARSENI_SALES_TABLE
@@ -213,10 +202,3 @@ I wanted to use powershell only but this idea ended up in a mixture of
 cmd, powershell and bash, each of them with its use cases. Some commands in examples work in cmd some in powershell,
 and some neither. I need to test everything and develop kinda universal style. So when facing misbehaviour try to
 write this command in one line without any break characters in cmd and powershell.
-
----
-
-Unstable image.  
-Image built by `build.sh` when running on host machine without minikube immediately exits. This is due to absence of
-"CMD /bin/sh -c" layer. I need to add this layer in build.sh when flag "-m" isn't set or test image performance in
-minikube with this layer included.
