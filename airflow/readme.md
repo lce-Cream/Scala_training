@@ -1,38 +1,59 @@
-### Launching spark example
+# Airflow setup
+I tried every possible way, the most convenient and, most importantly, working one is based on WSL.
+1. Install WSL (skip if you are on Linux).
+2. Run these commands to install all necessaries.
 
-```text
-*** Reading local file: /home/tia/airflow/logs/dag_id=example_spark_operator/run_id=manual__2022-05-26T01:03:51.417447+00:00/task_id=Spark-Pi/attempt=1.log
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1159} INFO - Dependencies all met for <TaskInstance: example_spark_operator.Spark-Pi manual__2022-05-26T01:03:51.417447+00:00 [queued]>
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1159} INFO - Dependencies all met for <TaskInstance: example_spark_operator.Spark-Pi manual__2022-05-26T01:03:51.417447+00:00 [queued]>
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1356} INFO - 
---------------------------------------------------------------------------------
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1357} INFO - Starting attempt 1 of 1
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1358} INFO - 
---------------------------------------------------------------------------------
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1377} INFO - Executing <Task(SparkSubmitOperator): Spark-Pi> on 2022-05-26 01:03:51.417447+00:00
-[2022-05-26, 07:03:53 +03] {standard_task_runner.py:52} INFO - Started process 28021 to run task
-[2022-05-26, 07:03:53 +03] {standard_task_runner.py:79} INFO - Running: ['airflow', 'tasks', 'run', 'example_spark_operator', 'Spark-Pi', 'manual__2022-05-26T01:03:51.417447+00:00', '--job-id', '25', '--raw', '--subdir', 'DAGS_FOLDER/MY_DAG.py', '--cfg-path', '/tmp/tmpjxxvgtl2', '--error-file', '/tmp/tmpzu62yi_3']
-[2022-05-26, 07:03:53 +03] {standard_task_runner.py:80} INFO - Job 25: Subtask Spark-Pi
-[2022-05-26, 07:03:53 +03] {task_command.py:369} INFO - Running <TaskInstance: example_spark_operator.Spark-Pi manual__2022-05-26T01:03:51.417447+00:00 [running]> on host ZHUKAUAT15.itd.iba.by
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1569} INFO - Exporting the following env vars:
-AIRFLOW_CTX_DAG_OWNER=airflow
-AIRFLOW_CTX_DAG_ID=example_spark_operator
-AIRFLOW_CTX_TASK_ID=Spark-Pi
-AIRFLOW_CTX_EXECUTION_DATE=2022-05-26T01:03:51.417447+00:00
-AIRFLOW_CTX_TRY_NUMBER=1
-AIRFLOW_CTX_DAG_RUN_ID=manual__2022-05-26T01:03:51.417447+00:00
-[2022-05-26, 07:03:53 +03] {base.py:68} INFO - Using connection ID 'spark_default' for task execution.
-[2022-05-26, 07:03:53 +03] {spark_submit.py:335} INFO - Spark-Submit cmd: spark-submit --master yarn --conf spark.executor.instances=3 --conf spark.executor.memory=500m --name spark-pi --class org.apache.spark.examples.SparkPi --queue root.default $SPARK_HOME/examples/jars/spark-examples_2.12-3.1.3.jar
-[2022-05-26, 07:03:53 +03] {spark_submit.py:488} INFO - JAVA_HOME is not set
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1889} ERROR - Task failed with exception
-Traceback (most recent call last):
-  File "/home/tia/.local/lib/python3.8/site-packages/airflow/providers/apache/spark/operators/spark_submit.py", line 157, in execute
-    self._hook.submit(self._application)
-  File "/home/tia/.local/lib/python3.8/site-packages/airflow/providers/apache/spark/hooks/spark_submit.py", line 419, in submit
-    raise AirflowException(
-airflow.exceptions.AirflowException: Cannot execute: spark-submit --master yarn --conf spark.executor.instances=3 --conf spark.executor.memory=500m --name spark-pi --class org.apache.spark.examples.SparkPi --queue root.default $SPARK_HOME/examples/jars/spark-examples_2.12-3.1.3.jar. Error code is: 1.
-[2022-05-26, 07:03:53 +03] {taskinstance.py:1395} INFO - Marking task as FAILED. dag_id=example_spark_operator, task_id=Spark-Pi, execution_date=20220526T010351, start_date=20220526T010353, end_date=20220526T010353
-[2022-05-26, 07:03:53 +03] {standard_task_runner.py:92} ERROR - Failed to execute job 25 for task Spark-Pi (Cannot execute: spark-submit --master yarn --conf spark.executor.instances=3 --conf spark.executor.memory=500m --name spark-pi --class org.apache.spark.examples.SparkPi --queue root.default $SPARK_HOME/examples/jars/spark-examples_2.12-3.1.3.jar. Error code is: 1.; 28021)
-[2022-05-26, 07:03:53 +03] {local_task_job.py:156} INFO - Task exited with return code 1
-[2022-05-26, 07:03:53 +03] {local_task_job.py:273} INFO - 0 downstream tasks scheduled from follow-on schedule check
+```bash
+apt update && apt upgrade;
+apt install default-jdk;
+apt install pip;
+pip install apache-airflow;
+pip install apache-airflow-providers-apache-spark-operators;
 ```
+
+3. Check your env
+```bash
+env | sort | grep HOME
+```
+Set `SPARK_HOME` if it's not already set.
+```bash
+export SPARK_HOME="/mnt/d/software/Spark/spark-3.1.3-bin-hadoop3.2"
+```
+And add it to path.
+```bash
+export PATH=$SPARK_HOME/bin:$PATH; source ~/.bashrc
+```
+By the way you can't use your java installed in Windows and setting it in path like Spark above wont work.
+
+
+4. Tweak airflow config (optional).
+
+```bash
+nano ~/airflow/airflow.cfg
+```
+ctrl+w for search
+> your dag folder
+
+dags_folder = /mnt/c/Users/user/Desktop/Scala_training/airflow
+> refresh your dags every 5 seconds
+
+dag_dir_list_interval = 5
+
+Set "local" instead of "yarn" in `spark_default` connection in airflow GUI.
+
+5. Launch Airflow
+```bash
+airflow db init; airflow standalone
+```
+
+# Run DAG
+Make changes to ./dag.py, set your credentials and application arguments.  
+Check your dag is in Airflow GUI and run it.
+
+# What I want to improve
+Learn more about variables and connection to remove credentials from DAG itself.
+
+# Questions
+When I tried to install Ubuntu and Mint virtual machines they worked awful, constant lags and crushes
+for no reason. Is there any protection software involved, which is trying to put down my VM?
+
