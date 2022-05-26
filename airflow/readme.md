@@ -1,6 +1,6 @@
 ### Launching spark example
 
-
+```text
 *** Reading local file: /home/tia/airflow/logs/dag_id=example_spark_operator/run_id=manual__2022-05-26T01:03:51.417447+00:00/task_id=Spark-Pi/attempt=1.log
 [2022-05-26, 07:03:53 +03] {taskinstance.py:1159} INFO - Dependencies all met for <TaskInstance: example_spark_operator.Spark-Pi manual__2022-05-26T01:03:51.417447+00:00 [queued]>
 [2022-05-26, 07:03:53 +03] {taskinstance.py:1159} INFO - Dependencies all met for <TaskInstance: example_spark_operator.Spark-Pi manual__2022-05-26T01:03:51.417447+00:00 [queued]>
@@ -35,3 +35,4 @@ airflow.exceptions.AirflowException: Cannot execute: spark-submit --master yarn 
 [2022-05-26, 07:03:53 +03] {standard_task_runner.py:92} ERROR - Failed to execute job 25 for task Spark-Pi (Cannot execute: spark-submit --master yarn --conf spark.executor.instances=3 --conf spark.executor.memory=500m --name spark-pi --class org.apache.spark.examples.SparkPi --queue root.default $SPARK_HOME/examples/jars/spark-examples_2.12-3.1.3.jar. Error code is: 1.; 28021)
 [2022-05-26, 07:03:53 +03] {local_task_job.py:156} INFO - Task exited with return code 1
 [2022-05-26, 07:03:53 +03] {local_task_job.py:273} INFO - 0 downstream tasks scheduled from follow-on schedule check
+```
