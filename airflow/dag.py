@@ -5,7 +5,35 @@ Example Airflow DAG to submit Apache Spark applications using
 from datetime import datetime
 
 from airflow.models import DAG
+from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from airflow.providers.telegram.operators.telegram import TelegramOperator
+from airflow.providers.jdbc.hooks.jdbc import JdbcHook
+from airflow.providers.jdbc.operators.jdbc import JdbcOperator
+from airflow.utils.edgemodifier import Label
+import logging
+
+handler = logging.StreamHandler()
+formatter = logging.Formatter('DAG::%(levelname)s:: %(message)s')
+handler.setFormatter(formatter)
+
+_LOGGER = logging.getLogger(__name__)
+_LOGGER.addHandler(handler)
+_LOGGER.setLevel(logging.INFO)
+
+def _test_connection():
+    connection = JdbcHook(conn_name_attr="db2", jdbc_conn_id="db2")
+    result, message = connection.test_connection()
+    _LOGGER.info(message)
+    return "table_exists" if result else "tg_failure"
+
+def _table_exists():
+    connection = JdbcHook(conn_name_attr="db2", jdbc_conn_id="db2")
+    result = connection.run("SELECT * FROM {{ table }} LIMIT 1")
+    _LOGGER.info(result)
+    return bool(result)
+
 
 with DAG(
     dag_id='my_app',
@@ -14,25 +42,38 @@ with DAG(
     catchup=False,
     tags=['app']
 ) as dag:
-    submit_job = SparkSubmitOperator(
-        task_id="app",
-        conn_id='spark_default',
-        name='spark-app',
-        application="/mnt/c/Users/user/Desktop/Scala_training/jars/app.jar",
-        jars="/mnt/c/Users/user/Desktop/Scala_training/jars/*",
-        conf={
-            'spark.executor.instances': 2,
-            'spark.executor.memory': '1000m'
-        },
-        java_class="Main",
-        application_args=["-m", "db2", "-a", "read", "-n", "5"],
-        verbose=True,
-        env_vars={
-            "spark.db2.url": "jdbc:db2://qwerty.databases.appdomain.cloud:30756/bludb:sslConnection=true;",
-            "spark.db2.user": "qwerty9",
-            "spark.db2.password": "qwerty7",
-            "spark.db2.table": "ARSENI_SALES_DATA",
-        }
+
+    test_connection = BranchPythonOperator(
+        task_id="test_connection",
+        python_callable=_test_connection
     )
 
-    submit_job
+    table_exists = BranchPythonOperator(
+        task_id="table_exists",
+        python_callable=_table_exists
+    )
+
+    fill_table = SparkSubmitOperator(
+        task_id="fill_table"
+    )
+
+    calculate_sum = SparkSubmitOperator(
+        task_id="calculate"
+    )
+
+    snapshot_table = EmptyOperator(
+        task_id="cos_snapshot"
+    )
+
+    telegram_send_success = TelegramOperator(
+        task_id="tg_success",
+        trigger_rule="none_failed_or_skipped"
+    )
+
+    telegram_send_failure = TelegramOperator(
+        task_id="tg_failure"
+    )
+
+    test_connection >> Label("failure") >> telegram_send_failure
+    test_connection >> Label("success") >> table_exists >> snapshot_table >> telegram_send_success
+    table_exists >> fill_table >> calculate_sum >> snapshot_table >> telegram_send_success

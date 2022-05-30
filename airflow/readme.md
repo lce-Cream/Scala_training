@@ -9,6 +9,9 @@ apt install default-jdk;
 apt install pip;
 pip install apache-airflow;
 pip install apache-airflow-providers-apache-spark-operators;
+pip install apache-airflow[spark];
+pip install apache-airflow[jdbc];
+pip install apache-airflow[telegram];
 ```
 
 3. Check your env
@@ -46,12 +49,18 @@ Set "local" instead of "yarn" in `spark_default` connection in airflow GUI.
 airflow db init; airflow standalone
 ```
 
+# DAG graph
+<img src="./graph.png">
+
 # Run DAG
-Make changes to ./dag.py, set your credentials and application arguments.  
+Set your credentials in aiflow connections.  
 Check your dag is in Airflow GUI and run it.
 
-# What I want to improve
-Learn more about variables and connection to remove credentials from DAG itself.
+# Plans
+1. Debug and test jdbc hooks (use jinja templating to pass table names)
+2. Create telegram bot to send messages from
+3. Extend/rework my app's cli interface so it is possible to fill table and do calculations independently
+4. Try to implement some kind of pagination (read and write iterators?) when calculating annual sales instead of loading whole table into ram
 
 # Questions
 When I tried to install Ubuntu and Mint virtual machines they worked awful, constant lags and crushes
