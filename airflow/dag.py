@@ -2,7 +2,7 @@
 Example Airflow DAG to submit Apache Spark applications using
 `SparkSubmitOperator`, `SparkJDBCOperator` and `SparkSqlOperator`.
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
@@ -12,32 +12,35 @@ from airflow.providers.telegram.operators.telegram import TelegramOperator
 from airflow.providers.jdbc.hooks.jdbc import JdbcHook
 from airflow.providers.jdbc.operators.jdbc import JdbcOperator
 from airflow.utils.edgemodifier import Label
-import logging
+from airflow.models import Variable
 
-handler = logging.StreamHandler()
-formatter = logging.Formatter('DAG::%(levelname)s:: %(message)s')
-handler.setFormatter(formatter)
 
-_LOGGER = logging.getLogger(__name__)
-_LOGGER.addHandler(handler)
-_LOGGER.setLevel(logging.INFO)
+DB2_CONN_ID = "db2_default"
+CONFIG = Variable.get("db2_config", deserialize_json=True)
 
-def _test_connection():
-    connection = JdbcHook(conn_name_attr="db2", jdbc_conn_id="db2")
-    result, message = connection.test_connection()
-    _LOGGER.info(message)
+
+def _test_connection(*args):
+    hook = JdbcHook(jdbc_conn_id=DB2_CONN_ID)
+    hook._test_connection_sql = "VALUES 1"
+    result, message = hook.test_connection()
+    print(message)
     return "table_exists" if result else "tg_failure"
 
+
 def _table_exists():
-    connection = JdbcHook(conn_name_attr="db2", jdbc_conn_id="db2")
-    result = connection.run("SELECT * FROM {{ table }} LIMIT 1")
-    _LOGGER.info(result)
-    return bool(result)
+    table = CONFIG["table"]
+
+    hook = JdbcHook(jdbc_conn_id=DB2_CONN_ID)
+    hook._test_connection_sql = f"SELECT 1 FROM {table}"
+    result, message = hook.test_connection()
+    print(message)
+    return "cos_snapshot" if result else "fill_table"
 
 
 with DAG(
     dag_id='my_app',
     schedule_interval=None,
+    # schedule_interval=timedelta(hours=4),
     start_date=datetime(2021, 1, 1),
     catchup=False,
     tags=['app']
@@ -65,15 +68,25 @@ with DAG(
         task_id="cos_snapshot"
     )
 
-    telegram_send_success = TelegramOperator(
+    telegram_send_success = PythonOperator(
         task_id="tg_success",
-        trigger_rule="none_failed_or_skipped"
+        python_callable=lambda:print("TG SUCC")
     )
 
-    telegram_send_failure = TelegramOperator(
-        task_id="tg_failure"
+    telegram_send_failure = PythonOperator(
+        task_id="tg_failure",
+        python_callable=lambda:print("TG FAIL")
     )
+
+    # telegram_send_success = TelegramOperator(
+    #     task_id="tg_success",
+    #     trigger_rule="none_failed_or_skipped"
+    # )
+
+    # telegram_send_failure = TelegramOperator(
+    #     task_id="tg_failure"
+    # )
 
     test_connection >> Label("failure") >> telegram_send_failure
-    test_connection >> Label("success") >> table_exists >> snapshot_table >> telegram_send_success
-    table_exists >> fill_table >> calculate_sum >> snapshot_table >> telegram_send_success
+    test_connection >> Label("success") >> table_exists >> Label("success") >> snapshot_table >> telegram_send_success
+    table_exists    >> Label("failure") >> fill_table   >> calculate_sum    >> snapshot_table >> telegram_send_success
