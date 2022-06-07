@@ -71,7 +71,7 @@ class DB2Connection(conf: Map[String, String]) extends AutoCloseable {
      *  @return DataFrame.
      */
     def write(df: DataFrame,
-              saveMode: SaveMode = SaveMode.Append): Boolean = {
+              saveMode: String = "append"): Boolean = {
 
         val properties = new Properties()
         properties.setProperty("driver", driver)

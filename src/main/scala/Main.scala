@@ -24,9 +24,9 @@ object Main {
     def writeDB2(number: Int): Boolean = {
         try {
             val df = DataFrameGenerator.generateSalesConcise(number)
-            val df_annual = calculateYearSales(df)
+//            val df_annual = calculateYearSales(df)
             val DB2Connection = new DB2Connection(config)
-            DB2Connection.write(df_annual)
+            DB2Connection.write(df)
         }
         catch {
             case e: Exception =>
@@ -89,13 +89,52 @@ object Main {
         }
     }
 
+    def calculate(): Boolean = {
+        try {
+            val DB2Connection = new DB2Connection(config)
+            val df = DB2Connection.read()
+            val df_annual = calculateYearSales(df)
+            DB2Connection.write(df_annual, saveMode = "overwrite")
+        }
+        catch {
+            case e: Exception =>
+                println(e.getMessage)
+                false
+        }
+    }
+
+    def snapshot(): Boolean = {
+        try {
+            val DB2Connection = new DB2Connection(config)
+            val COSConnection = new COSConnection(config)
+            val df = DB2Connection.read()
+            COSConnection.save(df, "snapshot.csv")
+        }
+        catch {
+            case e: Exception =>
+                println(e.getMessage)
+                false
+        }
+    }
+
     def main(args: Array[String]): Unit = {
         val argsMap = CLIParser.parse(args)
         val mode    = argsMap("mode")
         val action  = argsMap("action")
         val number  = argsMap("number").toInt
 
+        val calc = argsMap.contains("calc")
+        val snap = argsMap.contains("snap")
+
         if (argsMap.contains("verbose")) config.foreach(println)
+
+        if (calc) {
+            if (calculate()) println("CALCULATION DONE") else println("JOB ABORTED")
+        }
+
+        if (snap) {
+            if (snapshot()) println("SNAPSHOT DONE") else println("JOB ABORTED")
+        }
 
         mode match {
             case "db2" =>

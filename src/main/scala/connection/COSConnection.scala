@@ -5,7 +5,7 @@ import util.Spark
 
 class COSConnection(conf: Map[String, String]) {
     private val hadoopConf = Spark.sparkSession.sparkContext.hadoopConfiguration
-    private val service = conf("spark.cos.service")
+    private val service = conf.getOrElse("spark.cos.service", "arseni")
     private val bucket = conf("spark.cos.bucket")+s".$service/$service"
 
     hadoopConf.set("fs.stocator.scheme.list", "cos")
