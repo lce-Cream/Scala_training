@@ -2,12 +2,20 @@
     "db2_default": {
         "conn_type": "jdbc",
         "description": "my jdbc connection",
-        "host": "jdbc:db2://2f327qwerty4b907.c3n41qwerty9u98g.databases.appdomain.cloud:30756/bludb:sslConnection=true;",
-        "login": "qwerty79",
-        "password": "qwertyh70",
+        "host": "jdbc:db2://qwertynrk39u98g.databases.appdomain.cloud:31249/bludb:sslConnection=true;",
+        "login": "qwerty71",
+        "password": "qwertyTHd",
         "extra": {
             "extra__jdbc__drv_clsname": "com.ibm.db2.jcc.DB2Driver",
             "extra__jdbc__drv_path": "/mnt/c/Users/user/Desktop/Scala_training/jars/jcc-11.5.7.0.jar"
+        }
+    },
+    "spark_default": {
+        "conn_type": "spark",
+        "description": "my spark connection",
+        "host": "local",
+        "extra": {
+            "queue": "root.default"
         }
     }
 }

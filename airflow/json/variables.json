@@ -1,5 +1,14 @@
 {
-    "db2_config":{
-        "table": "ARSENI_SALES_TABLE"
+    "app_config": {
+        "table": "ARSENI_SALES_DATA",
+        "submit": {
+            "application": "/mnt/c/Users/user/Desktop/Scala_training/jars/app.jar",
+            "jars": "/mnt/c/Users/user/Desktop/Scala_training/jars/*",
+            "java_class": "Main",
+            "conf": {
+                "spark.executor.instances": "2",
+                "spark.executor.memory": "1000m"
+            }
+        }
     }
 }

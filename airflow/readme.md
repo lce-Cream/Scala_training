@@ -66,6 +66,9 @@ Check your dag is in Airflow GUI and run it.
 3. Try to implement some kind of pagination (read and write iterators?) when calculating annual sales instead of loading whole table into ram
 
 # Questions
-When I tried to install Ubuntu and Mint virtual machines they worked awful, constant lags and crushes
-for no reason. Is there any protection software involved, which is trying to put down my VM?
+1. I read something like I shouldn't write any code outside of DAG's operators because it slows down airflow when
+   it parses DAGs. Should I move my constants initialization in the beggining of my DAG to operators?
+
+2. When I tried to install Ubuntu and Mint virtual machines they worked awful, constant lags and crushes
+   for no reason. Is there any protection software involved, which is trying to put down my VM?
 

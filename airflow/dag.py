@@ -12,14 +12,17 @@ from airflow.providers.telegram.operators.telegram import TelegramOperator
 from airflow.providers.jdbc.hooks.jdbc import JdbcHook
 from airflow.providers.jdbc.operators.jdbc import JdbcOperator
 from airflow.utils.edgemodifier import Label
-from airflow.models import Variable
-
+from airflow.models import Variable, Connection
+from airflow.providers.amazon.aws.operators import s3 as COSOperator
 
 DB2_CONN_ID = "db2_default"
-CONFIG = Variable.get("db2_config", deserialize_json=True)
+SPARK_CONN_ID="spark_default"
+
+CONFIG = Variable.get("app_config", deserialize_json=True)
+DB2_CONNECTION = Connection.get_connection_from_secrets(DB2_CONN_ID)
 
 
-def _test_connection(*args):
+def _test_connection():
     hook = JdbcHook(jdbc_conn_id=DB2_CONN_ID)
     hook._test_connection_sql = "VALUES 1"
     result, message = hook.test_connection()
@@ -34,7 +37,7 @@ def _table_exists():
     hook._test_connection_sql = f"SELECT 1 FROM {table}"
     result, message = hook.test_connection()
     print(message)
-    return "cos_snapshot" if result else "fill_table"
+    return "cos_snapshot" if not result else "fill_table"
 
 
 with DAG(
@@ -57,12 +60,35 @@ with DAG(
     )
 
     fill_table = SparkSubmitOperator(
-        task_id="fill_table"
+        task_id="fill_table",
+        conn_id=SPARK_CONN_ID,
+        name='spark-app',
+        application_args = ["-m", "db2", "-a", "write", "-n", "5"],
+        verbose = True,
+        env_vars = {
+            "spark.db2.url":      DB2_CONNECTION.host,
+            "spark.db2.user":     DB2_CONNECTION.login,
+            "spark.db2.password": DB2_CONNECTION.password,
+            "spark.db2.table":    CONFIG["table"]
+        },
+        **CONFIG["submit"]
     )
 
     calculate_sum = SparkSubmitOperator(
-        task_id="calculate"
+        task_id="calculate",
+        conn_id=SPARK_CONN_ID,
+        name='spark-app',
+        application_args = ["-m", "calc"],
+        verbose = True,
+        env_vars = {
+            "spark.db2.url":      DB2_CONNECTION.host,
+            "spark.db2.user":     DB2_CONNECTION.login,
+            "spark.db2.password": DB2_CONNECTION.password,
+            "spark.db2.table":    CONFIG["table"]+"_ANNUAL"
+        }
+        **CONFIG["submit"]
     )
+
 
     snapshot_table = EmptyOperator(
         task_id="cos_snapshot"
@@ -87,6 +113,8 @@ with DAG(
     #     task_id="tg_failure"
     # )
 
+    test_connection >> Label("success") >> table_exists
     test_connection >> Label("failure") >> telegram_send_failure
-    test_connection >> Label("success") >> table_exists >> Label("success") >> snapshot_table >> telegram_send_success
-    table_exists    >> Label("failure") >> fill_table   >> calculate_sum    >> snapshot_table >> telegram_send_success
+
+    table_exists    >> Label("success") >> snapshot_table >> telegram_send_success
+    table_exists    >> Label("failure") >> fill_table     >> calculate_sum >> snapshot_table >> telegram_send_success
