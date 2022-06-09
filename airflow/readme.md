@@ -41,16 +41,18 @@ I tried every possible way, the most convenient and, most importantly, working o
 
     Set "local" instead of "yarn" in `spark_default` connection in airflow GUI.
 
-5. Add variables and connections.
+5. Initialize airflow config db nad add variables and connections.
+    It's better to turn off any antimalware software from this step on.
     Modify configs in ./json folder then run the following to load them in airflow.
     ```bash
+    airflow db init;
     airflow variables import ./json/variables.json;
     airflow connections import ./json/connections.json
     ```
 
 6. Launch Airflow
     ```bash
-    airflow db init; airflow standalone
+    airflow standalone
     ```
 
 # DAG graph
@@ -59,6 +61,10 @@ I tried every possible way, the most convenient and, most importantly, working o
 # Run DAG
 Set your credentials in aiflow connections.  
 Check your dag is in Airflow GUI and run it.
+
+# Problems
+Spark just decided to die, spark-submit doesn't work at all anymore hence SparkOperator is always down too.
+Logs are in ./logs/spark_death.log
 
 # Plans
 1. Extend/rework my app's cli interface so it is possible to fill table and do calculations independently
