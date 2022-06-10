@@ -2,26 +2,24 @@
 Airflow DAG to to load and transform data using Apache Spark application.
 """
 from datetime import datetime, timedelta
-import json
 
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.telegram.operators.telegram import TelegramOperator
-from airflow.providers.jdbc.hooks.jdbc import JdbcHook
-from airflow.providers.jdbc.operators.jdbc import JdbcOperator
 from airflow.utils.edgemodifier import Label
-from airflow.models import Variable, Connection
-from airflow.providers.amazon.aws.operators import s3 as COSOperator
 
-DB2_CONN_ID = "db2_default"
-SPARK_CONN_ID = "spark_default"
-COS_CONN_ID = "cos_default"
+DB2_CONN_ID =   "my_db2"
+SPARK_CONN_ID = "my_spark"
+COS_CONN_ID =   "my_cos"
 
 
 def get_config() -> dict:
     """Assembles all credentials and configs into one dictionary."""
+    import json
+    from airflow.models import Variable, Connection
+
     app_config = Variable.get("app_config", deserialize_json=True)
     db2_connection = Connection.get_connection_from_secrets(DB2_CONN_ID)
     cos_connection = json.loads(Connection.get_connection_from_secrets(COS_CONN_ID).extra)
@@ -41,11 +39,15 @@ def get_config() -> dict:
         },
         **app_config["submit"],
     }
+    print("MYCONFIG")
+    print(config)
     return config
 
 
 
 def _test_connection() -> str:
+    from airflow.providers.jdbc.hooks.jdbc import JdbcHook
+
     hook = JdbcHook(jdbc_conn_id=DB2_CONN_ID)
     hook._test_connection_sql = "VALUES 1"
     result, message = hook.test_connection()
@@ -54,13 +56,14 @@ def _test_connection() -> str:
 
 
 def _table_exists() -> str:
-    table = get_config()["env_vars"]["spark.db2.table"]
+    from airflow.providers.jdbc.hooks.jdbc import JdbcHook
 
+    table = get_config()["env_vars"]["spark.db2.table"]
     hook = JdbcHook(jdbc_conn_id=DB2_CONN_ID)
     hook._test_connection_sql = f"SELECT 1 FROM {table}"
     result, message = hook.test_connection()
     print(message)
-    return "cos_snapshot" if not result else "fill_table"
+    return "cos_snapshot" if result else "fill_table"
 
 
 with DAG(
@@ -86,7 +89,7 @@ with DAG(
         task_id="fill_table",
         conn_id=SPARK_CONN_ID,
         name='spark-app-fill',
-        application_args=["-m", "db2", "-a", "write", "-n", "5"],
+        application_args=["-m", "db2", "-a", "write", "-n", "10", "-v"],
         verbose = True,
         **get_config()
     )
@@ -127,6 +130,7 @@ with DAG(
     # telegram_send_failure = TelegramOperator(
     #     task_id="tg_failure"
     # )
+
 
     test_connection >> Label("success") >> table_exists
     test_connection >> Label("failure") >> telegram_send_failure
