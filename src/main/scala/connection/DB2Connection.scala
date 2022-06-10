@@ -71,7 +71,7 @@ class DB2Connection(conf: Map[String, String]) extends AutoCloseable {
      *  @return DataFrame.
      */
     def write(df: DataFrame,
-              saveMode: String = "append"): Boolean = {
+              saveMode: String = "overwrite"): Boolean = {
 
         val properties = new Properties()
         properties.setProperty("driver", driver)
@@ -104,14 +104,19 @@ class DB2Connection(conf: Map[String, String]) extends AutoCloseable {
 
     /** Executed passed SQL query.
      *
-     *  @param query SQL query.
-     *  @return ResultSet.
+     * @param query SQL query.
+     * @return ResultSet.
      */
-    def executeQuery(query: String): ResultSet = {
+    def executeQuery(query: String): Int = {
         val start = System.currentTimeMillis
-        val rs = connection.createStatement.executeQuery(query)
+        val rs = connection.createStatement.executeUpdate(query)
         logger.info(s"Execution of $query finished in ${Util.getDuration(start)}")
         rs
+    }
+
+    def deleteTable(): Unit = {
+        val res = executeQuery(s"DROP TABLE $table")
+        println(res)
     }
 
     /** Closes the connection. */

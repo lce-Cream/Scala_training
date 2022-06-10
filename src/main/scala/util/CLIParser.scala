@@ -11,15 +11,15 @@ object CLIParser {
     // first option group is used for basic operations
 
     var mode = new Option("m", "mode", true, "Launch process using db2/cos/local.")
-    mode.setRequired(true)
+    mode.setRequired(false)
     mode.setArgName("str")
 
     val action = new Option("a", "action", true, "Choose to read/write data.")
-    action.setRequired(true)
+    action.setRequired(false)
     action.setArgName("str")
 
     val number = new Option("n", "number", true, "Amount of records to use.")
-    number.setRequired(true)
+    number.setRequired(false)
     number.setArgName("int")
 
     val help = new Option("h", "help", false, "Show help massage.")
@@ -36,20 +36,13 @@ object CLIParser {
     val snapshot = new Option("s", "snap", false, "snapshot table to cos")
     snapshot.setRequired(false)
 
-    val group1 = new OptionGroup
-    val group2 = new OptionGroup
-
-    group1.addOption(mode)
-    group1.addOption(action)
-    group1.addOption(number)
-    group1.addOption(help)
-    group1.addOption(verbose)
-
-    group2.addOption(calculate)
-    group2.addOption(snapshot)
-
-    options.addOptionGroup(group1)
-    options.addOptionGroup(group2)
+    options.addOption(mode)
+    options.addOption(action)
+    options.addOption(number)
+    options.addOption(help)
+    options.addOption(verbose)
+    options.addOption(calculate)
+    options.addOption(snapshot)
 
     /** Parses CLI arguments into mapping.
      *
@@ -75,8 +68,8 @@ object CLIParser {
 
         val isValidGroup2 = calculate || snapshot
 
-        // return true if either of argument groups is valid
-        isValidGroup1 || isValidGroup2
+        // return true if either of argument groups is valid but not both
+        isValidGroup1 != isValidGroup2
     }
 
     /** Parses CLI arguments into mapping.

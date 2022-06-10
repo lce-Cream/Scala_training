@@ -26,7 +26,7 @@ object Main {
             val df = DataFrameGenerator.generateSalesConcise(number)
 //            val df_annual = calculateYearSales(df)
             val DB2Connection = new DB2Connection(config)
-            DB2Connection.write(df)
+            DB2Connection.write(df, "overwrite")
         }
         catch {
             case e: Exception =>
@@ -93,8 +93,12 @@ object Main {
         try {
             val DB2Connection = new DB2Connection(config)
             val df = DB2Connection.read()
+            df.show
             val df_annual = calculateYearSales(df)
-            DB2Connection.write(df_annual, saveMode = "overwrite")
+            df_annual.show
+            DB2Connection.deleteTable()
+//            DB2Connection.write(df_annual)
+            true
         }
         catch {
             case e: Exception =>
@@ -119,9 +123,9 @@ object Main {
 
     def main(args: Array[String]): Unit = {
         val argsMap = CLIParser.parse(args)
-        val mode    = argsMap("mode")
-        val action  = argsMap("action")
-        val number  = argsMap("number").toInt
+        val mode    = argsMap.getOrElse("mode", "")
+        val action  = argsMap.getOrElse("action", "")
+        val number  = argsMap.getOrElse("number", "0").toInt
 
         val calc = argsMap.contains("calc")
         val snap = argsMap.contains("snap")
@@ -166,6 +170,7 @@ object Main {
                     case "write" =>
                         if (writeLocal(number)) println("DONE") else println("JOB ABORTED")
                 }
+            case _ =>
         }
     }
 }
