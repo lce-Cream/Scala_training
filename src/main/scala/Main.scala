@@ -7,12 +7,14 @@ import util.CLIParser
 
 object Main {
     private val config = Config.getConfig
+    private val DB2Connection = new DB2Connection(config)
+    private val COSConnection = new COSConnection(config)
+    private val LocalConnection = new LocalConnection(config)
 
     def readDB2(number: Int): Option[DataFrame] = {
         try {
-            val DB2Connection = new DB2Connection(config)
-            // probably not the most efficient way to do it
-            Some(DB2Connection.read().limit(number))
+            // probably limit is not the most efficient way to do it
+            Some(DB2Connection.read(config("spark.db2.table")).limit(number))
         }
         catch {
             case e: Exception =>
@@ -24,9 +26,7 @@ object Main {
     def writeDB2(number: Int): Boolean = {
         try {
             val df = DataFrameGenerator.generateSalesConcise(number)
-//            val df_annual = calculateYearSales(df)
-            val DB2Connection = new DB2Connection(config)
-            DB2Connection.write(df, "overwrite")
+            DB2Connection.write(df, config("spark.db2.table"))
         }
         catch {
             case e: Exception =>
@@ -37,7 +37,6 @@ object Main {
 
     def readCOS(number: Int): Option[DataFrame] = {
         try {
-            val COSConnection = new COSConnection(config)
             Some(COSConnection.read("sales.csv").limit(number))
         }
         catch {
@@ -51,7 +50,6 @@ object Main {
         try {
             val df = DataFrameGenerator.generateSalesConcise(number)
             val df_annual = calculateYearSales(df)
-            val COSConnection = new COSConnection(config)
             COSConnection.save(df_annual, "sales.csv")
         }
         catch {
@@ -63,7 +61,6 @@ object Main {
 
     def readLocal(number: Int): Option[DataFrame] = {
         try {
-            val LocalConnection = new LocalConnection(config)
             Some(LocalConnection.read("test.csv").limit(number))
         }
         catch {
@@ -91,14 +88,9 @@ object Main {
 
     def calculate(): Boolean = {
         try {
-            val DB2Connection = new DB2Connection(config)
-            val df = DB2Connection.read()
-            df.show
+            val df = DB2Connection.read(config("spark.db2.table"))
             val df_annual = calculateYearSales(df)
-            df_annual.show
-            DB2Connection.deleteTable()
-//            DB2Connection.write(df_annual)
-            true
+            DB2Connection.write(df_annual, config("spark.db2.result"))
         }
         catch {
             case e: Exception =>
@@ -109,9 +101,7 @@ object Main {
 
     def snapshot(): Boolean = {
         try {
-            val DB2Connection = new DB2Connection(config)
-            val COSConnection = new COSConnection(config)
-            val df = DB2Connection.read()
+            val df = DB2Connection.read(config("spark.db2.result"))
             COSConnection.save(df, "snapshot.csv")
         }
         catch {

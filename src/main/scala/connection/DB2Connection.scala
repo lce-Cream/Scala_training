@@ -18,21 +18,23 @@ class DB2Connection(conf: Map[String, String]) extends AutoCloseable {
     private val user     = conf("spark.db2.user")
     private val password = conf("spark.db2.password")
     private val driver   = conf("spark.db2.driver")
-    private val table    = conf("spark.db2.table")
 
     if (!url.startsWith("jdbc:db2:")) throw new SQLException(s"driver is not yet supported: $url")
 
     private val connection: Connection = DriverManager.getConnection(url, user, password)
+    connection.setAutoCommit(true)
 
     /** Reads DataFrame from specified table.
      *
+     *  @param table  database table name to read data from.
      *  @param partitionColumn  the name of a column that will be used for partitioning.
      *  @param lowerBound the minimum value of columnName used to decide partition stride.
      *  @param upperBound the maximum value of columnName used to decide partition stride.
      *  @param numPartitions the number of partitions.
      *  @return DataFrame.
      */
-    def read(partitionColumn: Option[String] = None,
+    def read(table: String,
+             partitionColumn: Option[String] = None,
              lowerBound: Option[Long] = None,
              upperBound: Option[Long] = None,
              numPartitions: Option[Int] = None): DataFrame = {
@@ -60,17 +62,19 @@ class DB2Connection(conf: Map[String, String]) extends AutoCloseable {
                 properties
             )
         } else {
-            Spark.sparkSession.read.jdbc(url, table, properties)
+            Spark.sparkSession.read.option("header", "true").jdbc(url, table, properties)
         }
     }
 
     /** Writes passed DataFrame to specified table.
      *
      *  @param df DataFrame which is being written.
+     *  @param table database table name to write DataFrame to.
      *  @param saveMode Append/Overwrite/Ignore/errorIfExists.
      *  @return DataFrame.
      */
     def write(df: DataFrame,
+              table: String,
               saveMode: String = "overwrite"): Boolean = {
 
         val properties = new Properties()
@@ -93,7 +97,7 @@ class DB2Connection(conf: Map[String, String]) extends AutoCloseable {
      *
      *  @return Long.
      */
-    def getCount: Long = {
+    def getCount(table: String): Long = {
         val start = System.currentTimeMillis
         val query = s"SELECT COUNT(*) as number FROM $table"
         val rs = connection.createStatement.executeQuery(query)
@@ -114,9 +118,8 @@ class DB2Connection(conf: Map[String, String]) extends AutoCloseable {
         rs
     }
 
-    def deleteTable(): Unit = {
-        val res = executeQuery(s"DROP TABLE $table")
-        println(res)
+    def dropTable(table: String): Unit = {
+        executeQuery(s"DROP TABLE $table")
     }
 
     /** Closes the connection. */

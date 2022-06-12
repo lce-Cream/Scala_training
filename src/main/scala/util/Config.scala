@@ -7,14 +7,15 @@ object Config {
         "spark.db2.url"      -> "jdbc:db2://qwerty.databases.appdomain.cloud:30699/bludb:sslConnection=true;",
         "spark.db2.user"     -> "qwerty",
         "spark.db2.password" -> "qwerty",
-        "spark.db2.table"    -> "ARSENI_SALES_TABLE",
+        "spark.db2.table"    -> "ARSENI_SALES",
+        "spark.db2.result"   -> "ARSENI_SALES_ANNUAL",
         "spark.db2.driver"   -> "com.ibm.db2.jcc.DB2Driver",
     )
 
     val COSCredentials: Map[String, String] = Map(
         "spark.cos.access.key"     -> "qwerty",
         "spark.cos.secret.key"     -> "qwerty",
-        "spark.cos.endpoint"       -> "s3.fra.eu.cloud-object-storage",
+        "spark.cos.endpoint"       -> "s3.eu-de.cloud-object-storage.appdomain.cloud",
         "spark.cos.bucket"         -> "iba-ats-training-d3bf1ce5",
         "spark.cos.service"        -> "arseni",
     )
