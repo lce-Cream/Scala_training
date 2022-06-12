@@ -179,24 +179,6 @@ Annual sales DataFrame example.
 ```
 
 # Known issues
-Launch problems.  
-I suspect jdk and jre versions are responsible for such unstable behaviour, yet another reason to use containers.  
-Using sbt run or IntelliJ run button, app successfully reads data not every run, but when
-using jars or image in minikube everything is perfectly fine.
-```text
-22/05/22 18:40:48 INFO DB2Connection: Reading table: ARSENI_SALES_TABLE
-DB2 SQL Error: SQLCODE=-204, SQLSTATE=42704, SQLERRMC=DJC70779.ARSENI_SALES_TABLE, DRIVER=4.31.10
-JOB ABORTED
-```
-```text
-22/05/22 20:15:37 INFO ObjectStoreVisitor: Stocator registered as cos for cos://iba-ats-training-d3bf1ce5.arseni/arseni/sales.csv
-22/05/22 20:15:37 INFO COSAPIClient: Init :  cos://iba-ats-training-d3bf1ce5.arseni/arseni/sales.csv
-Unable to execute HTTP request: s3.fra.eu.cloud-object-storage
-JOB ABORTED
-```
-
----
-
 Commands confusion.  
 I wanted to use powershell only but this idea ended up in a mixture of
 cmd, powershell and bash, each of them with its use cases. Some commands in examples work in cmd some in powershell,

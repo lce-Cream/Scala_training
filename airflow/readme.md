@@ -1,6 +1,9 @@
 # Airflow setup
 I tried every possible way, the most convenient and, most importantly, working one is based on WSL.
+
 1. Install WSL (skip if you are on Linux).
+
+
 2. Run these commands to install all necessaries.
     ```bash
     apt update && apt upgrade;
@@ -31,30 +34,16 @@ I tried every possible way, the most convenient and, most importantly, working o
     By the way you can't use your java installed in Windows and setting it in path like Spark above wont work.
 
 
-5. Tweak airflow config (optional).
+5. Tweak airflow config (optional). Use ctrl+w for search.
     ```bash
     nano ~/airflow/airflow.cfg
     ```
-    ctrl+w for search
-    > your dag folder
-
-    dags_folder = /mnt/c/Users/user/Desktop/Scala_training/airflow
-    > refresh your dags every 5 seconds
-
-    dag_dir_list_interval = 5
-
-    Set "local" instead of "yarn" in `spark_default` connection in airflow GUI.
-
-6. Initialize airflow config db nad add variables and connections.
-    It's better to turn off any anti-malware software from this step on.
-    Modify configs in ./json folder then run the following to load them in airflow.
-    ```bash
-    airflow db init;
-    airflow variables import ./json/variables.json;
-    airflow connections import ./json/connections.json
-    ```
-
-7. Launch Airflow
+    
+    Set your dag folder: `dags_folder = /mnt/c/Users/user/Desktop/Scala_training/airflow`  
+  
+    And refresh it every 5 seconds: `dag_dir_list_interval = 5`  
+  
+7. Modify configs in ./json folder. It's better to turn off any anti-malware software from this step on. Launch Airflow.
     ```bash
     airflow standalone
     ```
@@ -62,15 +51,12 @@ I tried every possible way, the most convenient and, most importantly, working o
 # DAG graph
 <img src="./graph.png">
 
+
 # Run DAG
 Set your credentials in airflow connections.  
 Check your dag is in Airflow GUI and run it.
 
-# Plans
-1. Create telegram bot to send messages from
-2. Try to implement some kind of pagination (read and write iterators?) when calculating annual sales instead of loading whole table into ram
 
 # Questions
 When I tried to install Ubuntu and Mint virtual machines they worked awful, constant lags and crushes
 for no reason. Is there any protection software involved, which is trying to put down my VM?
-
