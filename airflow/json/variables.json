@@ -1,6 +1,9 @@
 {
     "app_config": {
-        "table": "ARSENI_SALES_DATA",
+        "table": "ARSENI_SALES",
+        "result": "ARSENI_SALES_ANNUAL",
+        "cwd": "/mnt/c/Users/user/Desktop/Scala_training/airflow",
+        "num_records": "50",
         "submit": {
             "application": "/mnt/c/Users/user/Desktop/Scala_training/jars/app.jar",
             "jars": "/mnt/c/Users/user/Desktop/Scala_training/jars/*",
