@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-reader-job
+spec:
+  template:
+    spec:
+      containers:
+        - image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: reader
+          args: ["/bin/sh","-c",'''spark-submit --jars /app/*, --class Main app.jar {{ .Values.Job.command | default "-m db2 -a read -n 10" }}''']
+          env:
+            - name: spark_db2_url
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.url
+            - name: spark_db2_user
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.user
+            - name: spark_db2_password
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.password
+            - name: spark_db2_table
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.db2.table
+            - name: spark_cos_access_key
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.access.key
+            - name: spark_cos_secret_key
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.secret.key
+            - name: spark_cos_endpoint
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.endpoint
+            - name: spark_cos_bucket
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.bucket
+            - name: spark_cos_service
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: spark.cos.service
+      restartPolicy: Never
+  # retries before marking as failed.
+  backoffLimit: 2
