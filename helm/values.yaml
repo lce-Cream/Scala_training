@@ -3,11 +3,11 @@ replicaCount: 1
 image:
   repository: arseni/spark-app
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 nameOverride: "spark-app"
 fullnameOverride: "spark-chart"
+SecretType: Opaque
 
 Job:
   command: -m db2 -a read -n 10
