@@ -117,6 +117,7 @@ with DAG(
         conn_id=SPARK_CONN_ID,
         name='spark-app-snapshot',
         application_args=["--snap"],
+        trigger_rule="one_success",
         verbose=True,
         **_get_config()
     )
@@ -141,3 +142,31 @@ with DAG(
 
     table_exists >> Label("success") >> snapshot_table >> telegram_send_success
     table_exists >> Label("failure") >> fill_table >> calculate_sum >> snapshot_table >> telegram_send_success
+
+    test_connection.doc="""
+    This task tests db2 connection with credentials from imported connections.
+    """
+
+    table_exists.doc="""
+    This task checks if table with specified in variables name exists in database.
+    """
+
+    fill_table.doc="""
+    This task creates and fills table with generated data.
+    """
+
+    calculate_sum.doc="""
+    This task calculates annual sales for each row in previously filled table and writes result in new table.
+    """
+
+    snapshot_table.doc="""
+    This task makes snapshot of annual sales table in db2 into cos.
+    """
+
+    telegram_send_success.doc="""
+    This task sends success message with some info about executed dag in telegram's direct messages.
+    """
+
+    telegram_send_failure.doc="""
+    This task sends failure message with some info about executed dag in telegram's direct messages.
+    """
