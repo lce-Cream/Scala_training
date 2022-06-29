@@ -71,18 +71,19 @@ with DAG(
     schedule_interval=timedelta(hours=4),
     start_date=datetime(2021, 1, 1),
     catchup=False,
-    tags=['app']
+    tags=['app'],
+    description='This DAG handles processes of creating and snapshoting tables',
 ) as dag:
 
-    load_vars_conns = BashOperator(
-        task_id="load_vars_conns",
-        bash_command=
-        '''
-            cd {{ var.json.app_config.cwd }}; 
-            airflow variables import ./json/variables.json;
-            airflow connections import ./json/connections.json
-        '''
-    )
+    # load_vars_conns = BashOperator(
+    #     task_id="load_vars_conns",
+    #     bash_command=
+    #     '''
+    #         cd /creds; 
+    #         airflow variables import ./json/variables.json;
+    #         airflow connections import ./json/connections.json
+    #     '''
+    # )
 
     test_connection = BranchPythonOperator(
         task_id="test_connection",
@@ -98,7 +99,7 @@ with DAG(
         task_id="fill_table",
         conn_id=SPARK_CONN_ID,
         name='spark-app-fill',
-        application_args=["-m", "db2", "-a", "write", "-n", "{{ var.json.app_config.num_records }}"],
+        application_args=["-m", "cos", "-a", "read", "-n", "{{ var.json.app_config.num_records }}"],
         verbose=True,
         **_get_config()
     )
@@ -118,6 +119,7 @@ with DAG(
         name='spark-app-snapshot',
         application_args=["--snap"],
         verbose=True,
+        trigger_rule="one_success",
         **_get_config()
     )
 
@@ -134,10 +136,38 @@ with DAG(
         text="DAG failure: {{ run_id }}"
     )
 
-    load_vars_conns >> test_connection
+    # load_vars_conns >> test_connection
 
     test_connection >> Label("success") >> table_exists
     test_connection >> Label("failure") >> telegram_send_failure
 
     table_exists >> Label("success") >> snapshot_table >> telegram_send_success
     table_exists >> Label("failure") >> fill_table >> calculate_sum >> snapshot_table >> telegram_send_success
+
+    test_connection.doc="""
+    This task tests db2 connection with credentials from imported connections.
+    """
+
+    table_exists.doc="""
+    This task checks if table with specified in variables name exists in database.
+    """
+
+    fill_table.doc="""
+    This task creates and fills table with generated data.
+    """
+
+    calculate_sum.doc="""
+    This task calculates annual sales for each row in previously filled table and writes result in new table.
+    """
+
+    snapshot_table.doc="""
+    This task makes snapshot of annual sales table in db2 into cos.
+    """
+
+    telegram_send_success.doc="""
+    This task sends success message with some info about executed dag in telegram's direct messages.
+    """
+
+    telegram_send_failure.doc="""
+    This task sends failure message with some info about executed dag in telegram's direct messages.
+    """

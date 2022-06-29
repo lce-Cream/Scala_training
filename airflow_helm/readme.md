@@ -44,11 +44,15 @@ helm upgrade air ./air-chart -f ./air-chart/values.yaml -n airflow
 
 # Problemes
 I don't know how to add connections and variables using chart's values.yalm,
-I guess they are stored in postgres.
+I guess they are stored in postgres. Until I figure it out, I have to bake creds into my docker image.
 
 ---
 
-I suspect it's not quite normal behaviour for scheduler.
+When airflow scheduler imports new DAG, all its functions, which are supposed to be executed on DAG runtime only (as I think), get executed. This results in queries to airflow variables and connections tables before they get populated in first DAG's task (commented in current dag.py). But such behavior breaks optimization logic, that states about moving all heavy operations to functions thus avoiding top level code. There is definitely some misunderstanding of this mechanism in my mind.
+
+---
+
+I suspect it is not quite normal behavior for scheduler and it should be way more stable.
 ```text
 NAME                                 READY   STATUS    RESTARTS         AGE
 pod/air-postgresql-0                 1/1     Running   1 (59m ago)      23h
@@ -59,5 +63,3 @@ pod/air-webserver-77bdcbf4bc-wt69g   1/1     Running   1 (59m ago)      23h
 ```
 
 ---
-
-Still trying to make working airflow image.

@@ -1,0 +1,41 @@
+{
+    "my_db2": {
+        "conn_type":   "jdbc",
+        "description": "my jdbc connection",
+        "host":        "jdbc:db2://qwerty.databases.appdomain.cloud:31249/bludb:sslConnection=true;",
+        "login":       "qwerty871",
+        "password":    "qwerty8rTHd",
+        "extra": {
+            "extra__jdbc__drv_clsname": "com.ibm.db2.jcc.DB2Driver",
+            "extra__jdbc__drv_path": "/app/jcc-11.5.7.0.jar"
+        }
+    },
+
+    "my_cos": {
+        "conn_type": "cos",
+        "description": "my cos connection",
+        "extra": {
+            "access.key": "qwerty86f6a2109a",
+            "secret.key": "qwerty01f07420c187",
+            "endpoint":   "s3.eu-de.cloud-object-storage.appdomain.cloud",
+            "bucket":     "iba-ats-training-d3bf1ce5",
+            "service":    "arseni"
+        }
+    },
+
+    "my_spark": {
+        "conn_type": "spark",
+        "description": "my spark connection",
+        "host": "local",
+        "extra": {
+            "queue": "root.default"
+        }
+    },
+
+    "my_telegram": {
+        "conn_type": "telegram",
+        "description": "my telegram connection",
+        "host": "123456789",
+        "password": "123456789:qwerty6y4K9LARF4RRFrU"
+    }
+}

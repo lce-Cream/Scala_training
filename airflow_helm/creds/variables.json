@@ -1,0 +1,16 @@
+{
+    "app_config": {
+        "table": "ARSENI_SALES",
+        "result": "ARSENI_SALES_ANNUAL",
+        "num_records": "50",
+        "submit": {
+            "application": "/app/app.jar",
+            "jars": "/app/*",
+            "java_class": "Main",
+            "conf": {
+                "spark.executor.instances": "2",
+                "spark.executor.memory": "1000m"
+            }
+        }
+    }
+}
