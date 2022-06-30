@@ -5,6 +5,13 @@ helm repo add apache-airflow https://airflow.apache.org
 helm pull apache-airflow/airflow
 ```
 
+Also, there is <a href="https://github.com/airflow-helm/charts/tree/main/charts/airflow">another airflow chart supplier</a> with thorough and friendly documentation, but I didn't manage to launch it despite seeming simplicity and countless tries.
+```bash
+helm repo add airflow-stable https://airflow-helm.github.io/charts
+helm repo update
+helm pull airflow-stable/airflow
+```
+
 And modified it by deleting and turning off some "unnecessary" stuff. Then I replaced original
 apache/airflow image with my image, in which I installed all required operator providers.
 
@@ -42,9 +49,8 @@ If air-chart/values.yalm gets any changes, use this to update the cluster.
 helm upgrade air ./air-chart -f ./air-chart/values.yaml -n airflow
 ```
 
-# Problemes
-I don't know how to add connections and variables using chart's values.yalm,
-I guess they are stored in postgres. Until I figure it out, I have to bake creds into my docker image.
+# Problems & Questions
+I'm still trying to load connections and variables using chart's values.yalm. It feels impossible. I ended up conducting experiments with ./dags/*_test.py to find a way to achieve my goal. Until I figure it out, I have to bake creds into my docker image, but it doesn't work in k8s.
 
 ---
 
@@ -52,7 +58,7 @@ When airflow scheduler imports new DAG, all its functions, which are supposed to
 
 ---
 
-I suspect it is not quite normal behavior for scheduler and it should be way more stable.
+I suspect it is not quite normal behavior for scheduler, and it should be way more stable.
 ```text
 NAME                                 READY   STATUS    RESTARTS         AGE
 pod/air-postgresql-0                 1/1     Running   1 (59m ago)      23h
@@ -63,3 +69,5 @@ pod/air-webserver-77bdcbf4bc-wt69g   1/1     Running   1 (59m ago)      23h
 ```
 
 ---
+
+What purpose does pod with postgres serve, what does it store? I think it's like sqlite in airflow standalone mode.

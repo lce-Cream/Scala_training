@@ -1,0 +1,13 @@
+env:
+  - name: "test_var"
+    value: "test_var_value"
+
+secret:
+  - envName: "test_conn"
+    secretName: "test-conn"
+    secretKey: "test-conn-key"
+
+extraSecrets:
+  test-conn:
+    stringData: |
+      test-conn-key: test_conn_value

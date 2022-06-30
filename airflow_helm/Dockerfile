@@ -18,9 +18,11 @@ RUN pip install --no-cache-dir apache-airflow[jdbc]
 RUN pip install --no-cache-dir apache-airflow[telegram]
 
 COPY ./jars/* /app/
-COPY ./dag.py /opt/airflow/dags
 COPY ./creds /creds
 
 RUN airflow db init
 RUN airflow connections import /creds/connections.json
 RUN airflow variables import /creds/variables.json
+
+COPY ./dags/var_test.py /opt/airflow/dags
+COPY ./dags/conn_test.py /opt/airflow/dags

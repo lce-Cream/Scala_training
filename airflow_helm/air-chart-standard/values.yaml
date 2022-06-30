@@ -237,14 +237,14 @@ allowPodLaunching: true
 
 # Environment variables for all airflow containers
 env: []
-# - name: ""
-#   value: ""
+# - name: "app_config"
+#   value: "mykey"
 
 # Secrets for all airflow containers
 secret: []
-# - envName: ""
-#   secretName: ""
-#   secretKey: ""
+# - envName: "my-db2"
+#   secretName: "my-db2"
+#   secretKey: "my-db2-creds"
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
@@ -291,10 +291,10 @@ extraSecrets: {}
 #          The value associated with this keys must be a string (can be templated)
 extraConfigMaps: {}
 # eg:
-extraConfigMaps:
-  '{{ .Release.Name }}-airflow-variables':
-    data: |
-      MY_AIRFLOW_VAR_HELLO_MESSAGE: "Hi!"
+# extraConfigMaps:
+#   '{{ .Release.Name }}-airflow-variables':
+#     data: |
+#       MY_AIRFLOW_VAR_HELLO_MESSAGE: "Hi!"
 #       AIRFLOW_VAR_KUBERNETES_NAMESPACE: "{{ .Release.Namespace }}"
 
 # Extra env 'items' that will be added to the definition of airflow containers
@@ -302,9 +302,9 @@ extraConfigMaps:
 # TODO: difference from `env`? This is a templated string. Probably should template `env` and remove this.
 extraEnv: ~
 # eg:
-extraEnv: |
-  - name: MY_AIRFLOW__CORE__LOAD_EXAMPLES
-    value: 'True'
+# extraEnv: |
+#   - name: MY_AIRFLOW__CORE__LOAD_EXAMPLES
+#     value: 'True'
 
 # Extra envFrom 'items' that will be added to the definition of airflow containers
 # A string is expected (can be templated).
@@ -1564,7 +1564,7 @@ dags:
     ## optional subpath for dag volume mount
     subPath: ~
   gitSync:
-    enabled: true
+    enabled: false
 
     # git repo clone url
     # ssh examples ssh://git@github.com/apache/airflow.git
