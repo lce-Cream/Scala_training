@@ -71,3 +71,7 @@ pod/air-webserver-77bdcbf4bc-wt69g   1/1     Running   1 (59m ago)      23h
 ---
 
 What purpose does pod with postgres serve, what does it store? I think it's like sqlite in airflow standalone mode.
+
+---
+
+Last and olny time I successfully installed custom airflow helm chart, it took 15 mins of pods crushing and restarting. Is there a specific order in which pods must be ready to finish whole process, and before they align in right order you have to wait or what? And how do I check pods logs if they constantly restart. I don't get it.

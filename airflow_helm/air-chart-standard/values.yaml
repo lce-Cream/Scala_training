@@ -236,15 +236,15 @@ executor: "LocalExecutor"
 allowPodLaunching: true
 
 # Environment variables for all airflow containers
-env: []
-# - name: "app_config"
-#   value: "mykey"
+env:
+- name: "my_var"
+  value: myvalue
 
 # Secrets for all airflow containers
-secret: []
-# - envName: "my-db2"
-#   secretName: "my-db2"
-#   secretKey: "my-db2-creds"
+secret:
+- envName: "test_conn"
+  secretName: "airflow-connections"
+  secretKey: "secret-key"
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
@@ -269,19 +269,19 @@ enableBuiltInSecretEnvVars:
 #    * key (can be templated) is the name of the secret that will be created
 #    * value: an object with the standard 'data' or 'stringData' key (or both).
 #          The value associated with those keys must be a string (can be templated)
-extraSecrets: {}
+# extraSecrets: {}
 # eg:
-# extraSecrets:
-  # '{{ .Release.Name }}-airflow-connections':
-  #   type: 'Opaque'
+extraSecrets:
+  'airflow-connections':
+    type: 'Opaque'
   #   data: |
   #     AIRFLOW_CONN_GCP: 'base64_encoded_gcp_conn_string'
   #     AIRFLOW_CONN_AWS: 'base64_encoded_aws_conn_string'
-  #   stringData: |
-  #     AIRFLOW_CONN_OTHER: 'other_conn'
-#   '{{ .Release.Name }}-other-secret-name-suffix':
-#     data: |
-#        ...
+    stringData: |
+      secret-key: 'secret_value'
+  # '{{ .Release.Name }}-other-secret-name-suffix':
+    # data: |
+      #  ...
 
 # Extra ConfigMaps that will be managed by the chart
 # (You can use them with extraEnv or extraEnvFrom or some of the extraVolumes values).
@@ -300,21 +300,21 @@ extraConfigMaps: {}
 # Extra env 'items' that will be added to the definition of airflow containers
 # a string is expected (can be templated).
 # TODO: difference from `env`? This is a templated string. Probably should template `env` and remove this.
-extraEnv: ~
+# extraEnv: ~
 # eg:
-# extraEnv: |
-#   - name: MY_AIRFLOW__CORE__LOAD_EXAMPLES
-#     value: 'True'
+extraEnv: |
+  - name: MY_AIRFLOW__CORE__LOAD_EXAMPLES
+    value: 'True'
 
 # Extra envFrom 'items' that will be added to the definition of airflow containers
 # A string is expected (can be templated).
-extraEnvFrom: ~
+# extraEnvFrom: ~
 # eg:
-# extraEnvFrom: |
-#   - secretRef:
-#       name: '{{ .Release.Name }}-airflow-connections'
-#   - configMapRef:
-#       name: '{{ .Release.Name }}-airflow-variables'
+extraEnvFrom: |
+  - secretRef:
+      name: airflow-connections
+  - configMapRef:
+      name: '{{ .Release.Name }}-airflow-variables'
 
 # Airflow database & redis config
 data:
